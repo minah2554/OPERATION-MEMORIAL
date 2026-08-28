@@ -116,14 +116,14 @@
       cursor: crosshair;
     }
 
-    /* 화면 하단 배치 깔끔한 안내 문구 */
+    /* 화면 하단 배치 한 줄 안내 문구 (모바일 최적화) */
     #intro-hint {
       position: absolute;
-      bottom: 2rem;
+      bottom: 2.2rem;
       left: 50%;
       transform: translateX(-50%);
       color: #ffffff;
-      font-size: clamp(0.7rem, 3.2vw, 0.84rem);
+      font-size: clamp(0.72rem, 3.4vw, 0.84rem);
       font-weight: 700;
       text-align: center;
       pointer-events: none;
@@ -131,15 +131,13 @@
       letter-spacing: 0.02em;
       text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95);
       animation: pulse 2s infinite;
-      word-break: keep-all;
-      width: auto;
-      max-width: 90%;
-      padding: 0.5rem 1.2rem;
+      white-space: nowrap;
+      padding: 0.45rem 1.15rem;
       background: rgba(0, 0, 0, 0.75);
       border-radius: 999px;
       border: 1px solid rgba(255, 255, 255, 0.35);
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
-      line-height: 1.4;
+      line-height: 1;
     }
 
     .intro-revealed #intro-bg {
@@ -1359,7 +1357,7 @@
     </div>
     <div id="spotlight"></div>
     <div id="touch-layer"></div>
-    <div id="intro-hint">💡 화면을 터치(드래그)하여 시야를 밝히거나 5초 후 자동 진입합니다.</div>
+    <div id="intro-hint">💡 화면을 드래그하여 작전을 개시하세요</div>
   </div>
 
   <!-- ══ 메인 컨텐츠 ══ -->
