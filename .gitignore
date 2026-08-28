@@ -1,0 +1,17 @@
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+
+# Vercel
+.vercel/
+
+# System
+.DS_Store
+Thumbs.db
+
+# Temp
+*.tmp
+
+.vercel
+.env*
