@@ -39,8 +39,11 @@
       --red: #ef4444;
     }
 
-    html {
+    html,
+    body {
       scroll-behavior: smooth;
+      overscroll-behavior-y: none;
+      overscroll-behavior: none;
     }
 
     body {
@@ -95,49 +98,59 @@
     }
 
     #intro-title .mw {
-      color: #000;
-      text-shadow: 0 0 25px rgba(255, 255, 255, 0.95);
+      color: var(--amber);
+      display: block;
     }
 
     #spotlight {
       position: absolute;
       inset: 0;
-      background: rgba(0, 0, 0, .96);
-      z-index: 20;
+      background: rgba(0, 0, 0, .97);
       pointer-events: none;
-      transition: background .04s ease-out;
+      transition: background .8s ease;
+      z-index: 2;
     }
 
     #touch-layer {
       position: absolute;
       inset: 0;
-      z-index: 40;
-      touch-action: none;
+      z-index: 5;
       cursor: crosshair;
+      touch-action: none;
     }
 
-    /* 화면 하단 배치 한 줄 안내 문구 (모바일 최적화) */
+    /* 화면 하단 터치 드래그 안내 문구 (시각 강화) */
     #intro-hint {
       position: absolute;
-      bottom: 2.2rem;
+      bottom: 2.5rem;
       left: 50%;
       transform: translateX(-50%);
-      color: #ffffff;
-      font-size: clamp(0.72rem, 3.4vw, 0.84rem);
-      font-weight: 700;
-      text-align: center;
-      pointer-events: none;
-      z-index: 30;
-      letter-spacing: 0.02em;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95);
-      animation: pulse 2s infinite;
-      white-space: nowrap;
-      padding: 0.45rem 1.15rem;
-      background: rgba(0, 0, 0, 0.75);
+      font-size: clamp(0.95rem, 4vw, 1.15rem);
+      color: #fff;
+      font-weight: 800;
+      background: rgba(0, 0, 0, 0.85);
+      border: 1.5px solid rgba(245, 158, 11, 0.8);
       border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.35);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
-      line-height: 1;
+      padding: 0.75rem 1.6rem;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 10;
+      animation: bounceHint 1.8s infinite ease-in-out;
+      box-shadow: 0 0 25px rgba(245, 158, 11, 0.45);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+      letter-spacing: 0.03em;
+    }
+
+    @keyframes bounceHint {
+
+      0%,
+      100% {
+        transform: translate(-50%, 0);
+      }
+
+      50% {
+        transform: translate(-50%, -8px);
+      }
     }
 
     .intro-revealed #intro-bg {
@@ -587,8 +600,15 @@
     }
 
     @keyframes stampIn {
-      0% { opacity: 0; transform: translate(-50%, -50%) rotate(-32deg) scale(2.3); }
-      100% { opacity: 0.96; transform: translate(-50%, -50%) rotate(-18deg) scale(1); }
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) rotate(-32deg) scale(2.3);
+      }
+
+      100% {
+        opacity: 0.96;
+        transform: translate(-50%, -50%) rotate(-18deg) scale(1);
+      }
     }
 
     .bc {
@@ -1245,6 +1265,7 @@
         opacity: 0;
         transform: translate(-50%, 14px);
       }
+
       to {
         opacity: 1;
         transform: translate(-50%, 0);
@@ -1409,7 +1430,21 @@
         gap: .4rem;
       }
     }
+    /* 저장된 세션이 있는 경우 새로고침 시 인트로 완전 스킵 */
+    html.has-saved-session #intro-wrapper {
+      display: none !important;
+    }
+    html.has-saved-session #main-content {
+      display: flex !important;
+    }
   </style>
+  <script>
+    try {
+      if (sessionStorage.getItem('opm_active_session')) {
+        document.documentElement.classList.add('has-saved-session');
+      }
+    } catch (e) { }
+  </script>
 </head>
 
 <body>
@@ -1430,7 +1465,8 @@
     <!-- 브리핑 -->
     <div id="briefing-section">
       <div class="wrap" style="text-align:center">
-        <span class="badge"><i class="fa-solid fa-shield-halved" style="margin-right:.3rem"></i>SECURE PROTOCOL ACTIVE</span>
+        <span class="badge"><i class="fa-solid fa-shield-halved" style="margin-right:.3rem"></i>SECURE PROTOCOL
+          ACTIVE</span>
         <h1 class="op-title">OPERATION : <span>MEMORIAL</span></h1>
         <p class="op-sub">작전명 : 메모리얼 · 전쟁기념관 현장체험학습 미션</p>
 
@@ -1443,7 +1479,8 @@
           <div class="info-card-title tg"><i class="fa-solid fa-list-check"></i> 행동 수칙</div>
           <ul>
             <li><b style="color:#fff">1. 완전 해독 필수:</b> 16칸의 빙고판을 <b style="color:#6ee7b7">모두 채워야</b> 작전이 완료됩니다.</li>
-            <li><b style="color:var(--amber)">2. 극비 지령 (4칸):</b> <b style="color:var(--amber)">금색 테두리</b>는 필수 특별 미션(선생님 접선 등)입니다.</li>
+            <li><b style="color:var(--amber)">2. 극비 지령 (4칸):</b> <b style="color:var(--amber)">금색 테두리</b>는 필수 특별 미션(선생님
+              접선 등)입니다.</li>
             <li><b style="color:#fff">3. 자유 탐색 (12칸):</b> 배정된 테마에 맞춰 기념관 곳곳을 둘러보고 자유롭게 전시품을 촬영하세요.</li>
             <li><b style="color:#fff">4. 작전 로그:</b> 관람 후 아래 MISSION LOG에 소감을 한 줄 남기세요.</li>
           </ul>
@@ -1465,8 +1502,9 @@
     <div id="student-view">
       <!-- 상단 내비게이션 & 홈으로 버튼 -->
       <div class="st-top-nav">
-        <button onclick="returnToHome()" class="btn-ghost" style="padding:.35rem .75rem;font-size:.72rem;display:inline-flex;align-items:center;gap:.35rem">
-          <i class="fa-solid fa-house"></i> 홈으로 (편대 변경)
+        <button onclick="returnToHome()" class="btn-ghost"
+          style="padding:.38rem .85rem;font-size:.75rem;display:inline-flex;align-items:center;gap:.4rem;font-weight:700">
+          <i class="fa-solid fa-house"></i> 홈으로
         </button>
         <div style="display:flex;align-items:center;gap:.5rem">
           <span class="sync-badge"><i class="fa-solid fa-arrows-rotate"></i> 실시간 연동중</span>
@@ -1474,15 +1512,15 @@
         </div>
       </div>
 
-      <div class="hud st-header">
+      <div class="hud st-header" id="st-header-box">
         <div class="st-header-row">
           <div>
-            <div style="font-size:.72rem;color:var(--muted);font-weight:700">빙고 해제 현황</div>
-            <div style="font-size:.85rem;font-weight:800;color:var(--text)" id="st-status-label">미션 진행중</div>
+            <div class="st-header-title"><i class="fa-solid fa-list-check ta"></i> 미션 완료 현황</div>
+            <div class="st-status-text" id="st-status-label">작전 수행중</div>
           </div>
           <div style="text-align:right;white-space:nowrap;margin-left:.75rem">
-            <div style="font-size:.65rem" class="tm">해제율</div>
-            <div class="prog-num"><span id="st-prog-cnt">0</span><span>/ 16</span></div>
+            <div style="font-size:.7rem;color:#94a3b8;font-weight:700;margin-bottom:.15rem">달성률</div>
+            <div class="prog-num" id="st-prog-num-box"><span id="st-prog-cnt">0</span><span> / 16</span></div>
           </div>
         </div>
         <div class="prog-bg">
@@ -1503,9 +1541,12 @@
 
       <!-- 테마 배정 대기 -->
       <div id="theme-draw">
-        <i class="fa-solid fa-shuffle" style="font-size:2.5rem;color:var(--green);margin-bottom:1rem;animation:pulse 1.5s infinite"></i>
+        <i class="fa-solid fa-shuffle"
+          style="font-size:2.5rem;color:var(--green);margin-bottom:1rem;animation:pulse 1.5s infinite"></i>
         <h3 style="font-size:1.05rem;font-weight:700;margin-bottom:.5rem">작전 테마 배정 대기중</h3>
-        <p style="font-size:.78rem;color:var(--muted);line-height:1.7;margin-bottom:1.5rem">버튼을 눌러 우리 반의 탐색 작전 테마를 배정받으세요.<br>기념관 전 구역을 둘러보며 테마에 맞는 전시품을 찾습니다.<br><span style="color:var(--amber);font-size:.72rem">(한 번 배정되면 같은 반 모든 친구들의 폰에 실시간 적용됩니다)</span></p>
+        <p style="font-size:.78rem;color:var(--muted);line-height:1.7;margin-bottom:1.5rem">버튼을 눌러 우리 반의 탐색 작전 테마를
+          배정받으세요.<br>기념관 전 구역을 둘러보며 테마에 맞는 전시품을 찾습니다.<br><span style="color:var(--amber);font-size:.72rem">(한 번 배정되면 같은
+            반 모든 친구들의 폰에 실시간 적용됩니다)</span></p>
         <button id="btn-draw-theme" class="btn-primary" style="max-width:280px">
           <i class="fa-solid fa-dice" style="margin-right:.4rem"></i>작전 테마 배정받기
         </button>
@@ -1523,7 +1564,8 @@
             <span class="log-hint">관람 후 작성</span>
           </div>
         </div>
-        <p style="font-size: clamp(0.74rem, 3.2vw, 0.82rem); color: #fde68a; margin-bottom: 0.65rem; font-weight: 700; line-height: 1.4; display: flex; align-items: center; gap: 0.35rem;">
+        <p
+          style="font-size: clamp(0.74rem, 3.2vw, 0.82rem); color: #fde68a; margin-bottom: 0.65rem; font-weight: 700; line-height: 1.4; display: flex; align-items: center; gap: 0.35rem;">
           <i class="fa-solid fa-circle-info" style="color: var(--amber);"></i>인상 깊었던 전시물과 소감을 기록하세요.
         </p>
         <div class="log-inputs">
@@ -1542,20 +1584,26 @@
           <h2 style="font-size:.95rem;font-weight:900;color:var(--green);display:flex;align-items:center;gap:.5rem">
             <i class="fa-solid fa-satellite-dish" style="animation:pulse 2s infinite"></i> COMMAND CENTER
           </h2>
-          <p style="font-size:.72rem;color:var(--muted);margin-top:.2rem">전체 학급 실시간 통합 모니터링 (구글시트 '설정' 탭에서 관리자비밀번호 변경 가능)</p>
+          <p style="font-size:.72rem;color:var(--muted);margin-top:.2rem">전체 학급 실시간 통합 모니터링 (구글시트 '설정' 탭에서 관리자비밀번호 변경
+            가능)</p>
         </div>
         <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-          <button class="btn-ghost" onclick="returnToHome()"><i class="fa-solid fa-house" style="margin-right:.3rem"></i>홈으로</button>
-          <button class="btn-ghost" onclick="refreshAdmin()"><i class="fa-solid fa-rotate-right" style="margin-right:.3rem"></i>새로고침</button>
-          <button class="btn-ghost btn-danger" onclick="resetAllDataConfirm()"><i class="fa-solid fa-trash-can" style="margin-right:.3rem"></i>기록 전체 초기화</button>
-          <button class="btn-ghost" id="btn-script-info" onclick="toggleScriptInfo()"><i class="fa-solid fa-gear" style="margin-right:.3rem"></i>설정 및 백엔드</button>
+          <button class="btn-ghost" onclick="returnToHome()"><i class="fa-solid fa-house"
+              style="margin-right:.3rem"></i>홈으로</button>
+          <button class="btn-ghost" onclick="refreshAdmin()"><i class="fa-solid fa-rotate-right"
+              style="margin-right:.3rem"></i>새로고침</button>
+          <button class="btn-ghost btn-danger" onclick="resetAllDataConfirm()"><i class="fa-solid fa-trash-can"
+              style="margin-right:.3rem"></i>기록 전체 초기화</button>
+          <button class="btn-ghost" id="btn-script-info" onclick="toggleScriptInfo()"><i class="fa-solid fa-gear"
+              style="margin-right:.3rem"></i>설정 및 백엔드</button>
         </div>
       </div>
 
       <!-- Apps Script 설정 안내 (토글) -->
       <div id="script-info-box" class="script-notice hidden">
         <p style="margin-bottom:.5rem"><b style="color:var(--amber)">📋 구글 시트 & 드라이브 자동 연동 설정 (Apps Script)</b></p>
-        <p>① <a href="https://docs.google.com/spreadsheets/d/1nWCYrJuGPscu5LmVX7nCfmXTgaOEI9ahJmXb2v4TKSg" target="_blank" style="color:var(--amber)">구글시트 열기</a> → [설정] 탭에서 관리자 비밀번호를 자유롭게 변경할 수 있습니다.</p>
+        <p>① <a href="https://docs.google.com/spreadsheets/d/1nWCYrJuGPscu5LmVX7nCfmXTgaOEI9ahJmXb2v4TKSg"
+            target="_blank" style="color:var(--amber)">구글시트 열기</a> → [설정] 탭에서 관리자 비밀번호를 자유롭게 변경할 수 있습니다.</p>
         <p>② [확장 프로그램] → [Apps Script]에서 <code>testDrive</code> 함수를 1회 실행하여 드라이브 권한을 승인해 주시면 됩니다.</p>
       </div>
 
@@ -1572,8 +1620,10 @@
 
     <!-- 모니터링 바 (관리자가 학생 뷰 감시 시) -->
     <div id="monitor-bar">
-      <button class="btn-ghost" onclick="backToAdmin()"><i class="fa-solid fa-arrow-left" style="margin-right:.3rem"></i>관리자로 돌아가기</button>
-      <span style="font-size:.75rem;color:var(--amber);font-weight:700"><i class="fa-solid fa-eye" style="margin-right:.3rem"></i>모니터링 모드</span>
+      <button class="btn-ghost" onclick="backToAdmin()"><i class="fa-solid fa-arrow-left"
+          style="margin-right:.3rem"></i>관리자로 돌아가기</button>
+      <span style="font-size:.75rem;color:var(--amber);font-weight:700"><i class="fa-solid fa-eye"
+          style="margin-right:.3rem"></i>모니터링 모드</span>
     </div>
 
     <!-- ★ 푸터 -->
@@ -1581,7 +1631,8 @@
       <div class="footer-inner">
         <div class="footer-brand">
           <div class="footer-sword-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.2"
+              stroke-linecap="round" stroke-linejoin="round">
               <path d="M14.5 17.5L3 6V3h3l11.5 11.5" />
               <path d="M13 19l6-6" />
               <path d="M16 16l4 4" />
@@ -1623,7 +1674,9 @@
     <div id="fb-modal-box" class="hud">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
         <h3 id="fb-modal-title" style="font-size:.9rem;font-weight:700"></h3>
-        <button onclick="closeFbModal()" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer"><i class="fa-solid fa-xmark"></i></button>
+        <button onclick="closeFbModal()"
+          style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer"><i
+            class="fa-solid fa-xmark"></i></button>
       </div>
       <div id="fb-modal-list" style="display:flex;flex-direction:column;gap:.5rem"></div>
     </div>
@@ -1633,20 +1686,27 @@
   <div id="photo-modal">
     <div class="preview-inner">
       <div class="preview-top">
-        <span id="preview-title" style="font-size:.85rem;font-weight:700;color:var(--amber);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:.5rem"></span>
-        <button id="btn-close-preview" style="background:none;border:none;color:var(--muted);font-size:1.25rem;cursor:pointer"><i class="fa-solid fa-xmark"></i></button>
+        <span id="preview-title"
+          style="font-size:.85rem;font-weight:700;color:var(--amber);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:.5rem"></span>
+        <button id="btn-close-preview"
+          style="background:none;border:none;color:var(--muted);font-size:1.25rem;cursor:pointer"><i
+            class="fa-solid fa-xmark"></i></button>
       </div>
       <img id="preview-img" src="" alt="미션 인증 사진">
-      <button id="btn-reupload" class="btn-reupload"><i class="fa-solid fa-camera-rotate" style="margin-right:.4rem"></i>사진 다시 찍기 (교체)</button>
+      <button id="btn-reupload" class="btn-reupload"><i class="fa-solid fa-camera-rotate"
+          style="margin-right:.4rem"></i>사진 다시 찍기 (교체)</button>
     </div>
   </div>
 
   <!-- ── 빙고 클리어 ── -->
   <div id="clear-modal">
     <div class="hud clear-box">
-      <i class="fa-solid fa-medal" style="font-size:3rem;color:var(--amber);margin-bottom:1rem;display:block;animation:pulse 1.5s infinite"></i>
-      <h2 style="font-size:1.5rem;font-weight:900;color:var(--amber);letter-spacing:.1em;margin-bottom:.5rem">ARCHIVE CLEARED</h2>
-      <p style="font-size:.85rem;color:#cbd5e1;line-height:1.7;margin-bottom:1.5rem">16칸의 빙고판을 모두 완성하였습니다!<br>작전 완수를 축하합니다. 🎉</p>
+      <i class="fa-solid fa-medal"
+        style="font-size:3rem;color:var(--amber);margin-bottom:1rem;display:block;animation:pulse 1.5s infinite"></i>
+      <h2 style="font-size:1.5rem;font-weight:900;color:var(--amber);letter-spacing:.1em;margin-bottom:.5rem">ARCHIVE
+        CLEARED</h2>
+      <p style="font-size:.85rem;color:#cbd5e1;line-height:1.7;margin-bottom:1.5rem">16칸의 빙고판을 모두 완성하였습니다!<br>작전 완수를
+        축하합니다. 🎉</p>
       <button onclick="document.getElementById('clear-modal').classList.remove('on')" class="btn-primary">확인 완료</button>
     </div>
   </div>
@@ -1665,7 +1725,8 @@
   <!-- ── 토스트 로더 ── -->
   <div id="loader">
     <div class="spin-ring"></div>
-    <span id="loader-msg" style="font-size:.74rem;font-weight:700;color:var(--amber);letter-spacing:.05em">동기화중...</span>
+    <span id="loader-msg"
+      style="font-size:.74rem;font-weight:700;color:var(--amber);letter-spacing:.05em">동기화중...</span>
   </div>
 
   <input type="file" id="file-uploader" accept="image/*" class="hidden">
@@ -1702,7 +1763,7 @@
           });
           localStorage.setItem('opm_cache_version', DATA_VERSION);
         }
-      } catch (e) {}
+      } catch (e) { }
     })();
 
     /* ═══════════════════════════════════════════════════════════
@@ -1777,7 +1838,7 @@
             .filter(c => c.name);
           if (loaded.length) CLASSES = loaded;
         }
-      } catch (e) {}
+      } catch (e) { }
 
       // 2. 관리자 비밀번호 시트 '설정' 탭에서 실시간 로드
       try {
@@ -1789,7 +1850,7 @@
             break;
           }
         }
-      } catch (e) {}
+      } catch (e) { }
 
       rebuildClassSelect();
     }
@@ -1810,47 +1871,89 @@
        ═══════════════════════════════════════════════════════════ */
     let lastRenderedStateJson = '';
 
+    // 구글 시트 저장용 cells 정제 (초대용량 base64로 인한 시트 50,000자 용량 초과 에러 완벽 방지)
+    function sanitizeCellsForSheet(cells) {
+      if (!cells || !Array.isArray(cells)) return [];
+      return cells.map(c => {
+        let cleanUrl = c.imgUrl || '';
+        // base64나 blob URL은 시트 셀 용량 폭탄이 되므로 시트에는 드라이브 URL이나 상태 플래그만 저장
+        if (cleanUrl.startsWith('data:') || cleanUrl.startsWith('blob:')) {
+          cleanUrl = '';
+        }
+        return {
+          id: c.id,
+          title: c.title || '',
+          desc: c.desc || '',
+          isSpecial: !!c.isSpecial,
+          isTeacher: !!c.isTeacher,
+          freeNum: c.freeNum || null,
+          completed: !!c.completed,
+          imgUrl: cleanUrl
+        };
+      });
+    }
+
     const DB = {
       _k: (col, id) => `opm_${col}_${id}`,
 
-      // 1. 학급 상태 로드
+      // 1. 학급 상태 로드 (로컬 완료 상태 보존 병합)
       async getClass(id) {
+        let localCached = null;
+        try {
+          const r = localStorage.getItem(this._k('classes', id));
+          if (r) localCached = JSON.parse(r);
+        } catch (e) { }
+
         try {
           const rows = await loadSheetJSON('학급상태');
           for (let i = 0; i < rows.length; i++) {
             const r = rows[i].c;
             if (r && String(r[0]?.v) === id) {
               const cellsRaw = r[5]?.v;
-              const parsedCells = cellsRaw ? JSON.parse(String(cellsRaw)) : [];
+              const serverCells = cellsRaw ? JSON.parse(String(cellsRaw)) : [];
+
+              // 안전한 병합: 로컬에서 이미 완료한 미션이 서버 지연으로 덮어씌워져 미완료로 리셋되는 현상 완벽 방지
+              const mergedCells = (serverCells || []).map((srvCell, idx) => {
+                const locCell = localCached?.cells?.[idx];
+                const isCompleted = srvCell.completed || (locCell && locCell.completed);
+                const localImg = locCell?.imgUrl || localStorage.getItem(`opm_img_${id}_${idx}`) || '';
+                return {
+                  ...srvCell,
+                  completed: !!isCompleted,
+                  imgUrl: srvCell.imgUrl || localImg,
+                  title: srvCell.title || locCell?.title || ''
+                };
+              });
+
               const data = {
                 classId: String(r[0]?.v),
                 className: String(r[1]?.v || id),
-                themeId: String(r[2]?.v || ''),
-                themeName: String(r[3]?.v || ''),
-                teacherNum: r[4]?.v ? Number(r[4].v) : null,
-                cells: parsedCells
+                themeId: String(r[2]?.v || localCached?.themeId || ''),
+                themeName: String(r[3]?.v || localCached?.themeName || ''),
+                teacherNum: r[4]?.v ? Number(r[4].v) : (localCached?.teacherNum || null),
+                cells: mergedCells.length ? mergedCells : (localCached?.cells || [])
               };
               localStorage.setItem(this._k('classes', id), JSON.stringify(data));
               return data;
             }
           }
-        } catch (e) {}
+        } catch (e) { }
 
-        const r = localStorage.getItem(this._k('classes', id));
-        return r ? JSON.parse(r) : null;
+        return localCached;
       },
 
       // 2. 학급 상태 저장
       async setClass(id, data) {
         localStorage.setItem(this._k('classes', id), JSON.stringify(data));
         const cls = CLASSES.find(c => c.id === id);
+        const cleanCells = sanitizeCellsForSheet(data.cells);
         callGAS('saveClassState', {
           classId: id,
           className: data.name || data.className || cls?.name || id,
           themeId: data.themeId || '',
           themeName: data.themeName || '',
           teacherNum: data.teacherNum || '',
-          cells: data.cells || []
+          cells: cleanCells
         });
       },
 
@@ -1859,13 +1962,14 @@
         const updated = { ...cur, ...partial };
         localStorage.setItem(this._k('classes', id), JSON.stringify(updated));
         const cls = CLASSES.find(c => c.id === id);
-        callGAS('saveClassState', {
+        const cleanCells = sanitizeCellsForSheet(updated.cells);
+        await callGAS('saveClassState', {
           classId: id,
           className: updated.className || updated.name || cls?.name || id,
           themeId: updated.themeId || '',
           themeName: updated.themeName || '',
           teacherNum: updated.teacherNum || '',
-          cells: updated.cells || []
+          cells: cleanCells
         });
         return updated;
       },
@@ -1892,7 +1996,7 @@
             }
             return list;
           }
-        } catch (e) {}
+        } catch (e) { }
 
         const list = [];
         for (const cls of CLASSES) {
@@ -1933,7 +2037,7 @@
             localStorage.setItem(`opm_fb_${cid}`, JSON.stringify(list));
             return list;
           }
-        } catch (e) {}
+        } catch (e) { }
 
         const r = localStorage.getItem(`opm_fb_${cid}`);
         return r ? JSON.parse(r) : [];
@@ -1978,8 +2082,26 @@
     let isAdminLogin = false;
 
     /* ═══════════════════════════════════════════════════════════
-       ★ 인트로 (5초 자동 스킵 & 하단 안내문구)
+       ★ 인트로 (5초 자동 스킵 & 하단 안내문구 & 당겨서 새로고침 방지)
        ═══════════════════════════════════════════════════════════ */
+    // 모바일 아래로 당겨 원치 않게 새로고침(Pull-to-Refresh)되는 현상 완벽 방지
+    let touchStartY = 0;
+    window.addEventListener('touchstart', e => {
+      if (e.touches && e.touches[0]) {
+        touchStartY = e.touches[0].clientY;
+      }
+    }, { passive: true });
+
+    window.addEventListener('touchmove', e => {
+      if (!e.touches || !e.touches[0]) return;
+      const touchY = e.touches[0].clientY;
+      const touchDiff = touchY - touchStartY;
+      // 화면 최상단에서 아래로 당기는 새로고침 제스처 차단 (앱 내부 스크롤은 정상 작동)
+      if (window.scrollY <= 0 && touchDiff > 0 && e.cancelable) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+
     {
       const touch = document.getElementById('touch-layer');
       const spot = document.getElementById('spotlight');
@@ -2006,8 +2128,15 @@
       touch.addEventListener('touchmove', onMove, { passive: false });
     }
 
-    function unlockIntro() {
+    function unlockIntro(instant = false) {
       const w = document.getElementById('intro-wrapper');
+      if (instant) {
+        w.style.display = 'none';
+        w.style.opacity = '0';
+        w.style.visibility = 'hidden';
+        document.getElementById('main-content').classList.add('on');
+        return;
+      }
       w.classList.add('intro-revealed');
       setTimeout(() => {
         w.style.opacity = '0';
@@ -2054,10 +2183,13 @@
        ★ 홈으로 돌아가기
        ═══════════════════════════════════════════════════════════ */
     function returnToHome() {
+      sessionStorage.removeItem('opm_active_session');
+      document.documentElement.classList.remove('has-saved-session');
       if (pollingTimer) { clearInterval(pollingTimer); pollingTimer = null; }
       if (fbPollingTimer) { clearInterval(fbPollingTimer); fbPollingTimer = null; }
       currentClassId = null;
       currentClassName = '';
+      currentClassData = null;
       isAdminMonitor = false;
       lastRenderedStateJson = '';
 
@@ -2132,7 +2264,7 @@
               }
             }
           }
-        } catch (e) {}
+        } catch (e) { }
 
         // 2. Apps Script 백엔드 검증 보조
         if (!isValidAdmin) {
@@ -2148,6 +2280,7 @@
         hideToast();
 
         if (isValidAdmin) {
+          sessionStorage.setItem('opm_active_session', JSON.stringify({ role: 'admin' }));
           document.getElementById('login-modal').classList.remove('on');
           document.getElementById('admin-view').classList.add('on');
           document.getElementById('monitor-bar').classList.remove('on');
@@ -2163,6 +2296,7 @@
         currentClassId = clsId;
         currentClassName = cls.name;
         isAdminMonitor = false;
+        sessionStorage.setItem('opm_active_session', JSON.stringify({ role: 'student', classId: clsId, className: cls.name }));
         document.getElementById('login-modal').classList.remove('on');
         document.getElementById('student-view').classList.add('on');
         showToast('작전 데이터 실시간 연결중...', 1200);
@@ -2225,7 +2359,7 @@
           if (!ok) return;
           const theme = THEMES[Math.floor(Math.random() * THEMES.length)];
           const initialCells = makeInitialCells();
-          
+
           const updatedState = {
             className: currentClassName,
             themeName: theme.name,
@@ -2269,6 +2403,11 @@
       const drawSection = document.getElementById('theme-draw');
       const grid = document.getElementById('bingo-grid');
       const themeCard = document.getElementById('st-theme-card');
+      const statusLabel = document.getElementById('st-status-label');
+      const headerBox = document.getElementById('st-header-box');
+      const progNumBox = document.getElementById('st-prog-num-box');
+      const progBar = document.getElementById('st-prog-bar');
+      const progCnt = document.getElementById('st-prog-cnt');
 
       currentClassData = data;
 
@@ -2282,9 +2421,17 @@
         themeCard.classList.remove('on');
         drawSection.classList.add('on');
         grid.classList.remove('on');
-        document.getElementById('st-status-label').textContent = '작전 테마 배정 대기중';
-        document.getElementById('st-prog-cnt').textContent = '0';
-        document.getElementById('st-prog-bar').style.width = '0%';
+        if (statusLabel) {
+          statusLabel.textContent = '작전 테마 배정 대기중';
+          statusLabel.classList.remove('cleared');
+        }
+        if (headerBox) headerBox.classList.remove('all-cleared');
+        if (progNumBox) progNumBox.classList.remove('cleared');
+        if (progCnt) progCnt.textContent = '0';
+        if (progBar) {
+          progBar.style.width = '0%';
+          progBar.classList.remove('cleared');
+        }
         return;
       }
 
@@ -2295,7 +2442,6 @@
       const matchedTheme = THEMES.find(t => t.name === data.themeName) || { desc: '기념관 전 구역을 탐색하며 테마에 맞는 유물을 찾아보세요.' };
       document.getElementById('st-theme-title').innerHTML = `<i class="fa-solid fa-flag ta" style="margin-right:.4rem"></i>${data.themeName}`;
       document.getElementById('st-theme-desc').textContent = matchedTheme.desc;
-      document.getElementById('st-status-label').textContent = '작전 수행중';
 
       grid.innerHTML = '';
       let comp = 0;
@@ -2308,8 +2454,8 @@
           // 썸네일 캐시 안전 복원
           const cachedImg = localStorage.getItem(`opm_img_${currentClassId}_${cell.id}`);
           const imgSrc = cell.imgUrl || cachedImg || 'https://images.unsplash.com/photo-1590496793929-36417d3117de?auto=format&fit=crop&w=400&q=80';
-          if (cell.imgUrl && !cell.imgUrl.startsWith('blob:')) {
-            try { localStorage.setItem(`opm_img_${currentClassId}_${cell.id}`, cell.imgUrl); } catch(e){}
+          if (cell.imgUrl && !cell.imgUrl.startsWith('blob:') && !cell.imgUrl.startsWith('data:')) {
+            try { localStorage.setItem(`opm_img_${currentClassId}_${cell.id}`, cell.imgUrl); } catch (e) { }
           }
           const missionLabel = (cell.isTeacher && data.teacherNum) ? `선생님+${data.teacherNum}번` : (cell.isSpecial ? cell.title : `자유 탐색 ${cell.freeNum || ''}`);
           div.innerHTML = `
@@ -2335,16 +2481,33 @@
         grid.appendChild(div);
       });
 
-      // 16칸 완성 시 대각선 스탬프 배치
+      // 16개 완료 여부에 따른 문구 및 색상 전환
       if (comp === 16) {
+        if (statusLabel) {
+          statusLabel.textContent = '작전 수행 완료';
+          statusLabel.classList.add('cleared');
+        }
+        if (headerBox) headerBox.classList.add('all-cleared');
+        if (progNumBox) progNumBox.classList.add('cleared');
+        if (progBar) progBar.classList.add('cleared');
+
+        // 16칸 완성 시 대각선 스탬프 배치
         const stamp = document.createElement('div');
         stamp.className = 'bingo-cleared-stamp';
         stamp.textContent = 'MISSION COMPLETE';
         grid.appendChild(stamp);
+      } else {
+        if (statusLabel) {
+          statusLabel.textContent = '작전 수행중';
+          statusLabel.classList.remove('cleared');
+        }
+        if (headerBox) headerBox.classList.remove('all-cleared');
+        if (progNumBox) progNumBox.classList.remove('cleared');
+        if (progBar) progBar.classList.remove('cleared');
       }
 
-      document.getElementById('st-prog-cnt').textContent = comp;
-      document.getElementById('st-prog-bar').style.width = `${Math.round((comp / 16) * 100)}%`;
+      if (progCnt) progCnt.textContent = comp;
+      if (progBar) progBar.style.width = `${Math.round((comp / 16) * 100)}%`;
 
       if (comp === 16 && !hasCleared) {
         hasCleared = true;
@@ -2413,51 +2576,64 @@
     }
 
     /* ═══════════════════════════════════════════════════════════
-       ★ 초고속 사진 업로드 & 드라이브 자동 저장 (즉각 0.001초 피드백)
+       ★ 초고속 사진 업로드 & 구글 드라이브/시트 완벽 연동
        ═══════════════════════════════════════════════════════════ */
     document.getElementById('file-uploader').onchange = async e => {
       const file = e.target.files[0];
       if (!file || selectedCellIdx === null) return;
-      
+
       try {
-        showToast('인증 확인 중', 2000);
+        showToast('인증 사진 처리 및 저장 중...', 0);
 
         // 1. 즉시 로컬 Blob URL 생성하여 화면에 0.001초만에 즉각 반영
         const localBlobUrl = URL.createObjectURL(file);
         if (currentClassData && currentClassData.cells && currentClassData.cells[selectedCellIdx]) {
           currentClassData.cells[selectedCellIdx].completed = true;
           currentClassData.cells[selectedCellIdx].imgUrl = localBlobUrl;
+          localStorage.setItem(DB._k('classes', currentClassId), JSON.stringify(currentClassData));
           renderGrid(currentClassData);
         }
 
-        // 2. 비동기 백그라운드 압축 및 저장
+        // 2. 이미지 압축 (모바일 전송 최적화)
         const base64 = await compressImgToBase64(file);
         try {
           localStorage.setItem(`opm_img_${currentClassId}_${selectedCellIdx}`, base64);
-        } catch (err) {}
+        } catch (err) { }
+
+        // 로컬 데이터에 base64 반영
+        if (currentClassData && currentClassData.cells && currentClassData.cells[selectedCellIdx]) {
+          currentClassData.cells[selectedCellIdx].completed = true;
+          currentClassData.cells[selectedCellIdx].imgUrl = base64;
+          localStorage.setItem(DB._k('classes', currentClassId), JSON.stringify(currentClassData));
+        }
 
         const cellTitle = currentClassData?.cells?.[selectedCellIdx]?.title || '미션';
 
-        (async () => {
-          try {
-            const driveUrl = await DB.uploadPhoto(currentClassId, currentClassName, selectedCellIdx, cellTitle, base64);
-            if (driveUrl && driveUrl.startsWith('http')) {
-              if (currentClassData && currentClassData.cells && currentClassData.cells[selectedCellIdx]) {
-                currentClassData.cells[selectedCellIdx].imgUrl = driveUrl;
-                try {
-                  localStorage.setItem(`opm_img_${currentClassId}_${selectedCellIdx}`, driveUrl);
-                } catch (e) {}
-              }
+        // 3. 구글 드라이브 업로드 및 시트 상태 저장 완료 보장
+        try {
+          const driveUrl = await DB.uploadPhoto(currentClassId, currentClassName, selectedCellIdx, cellTitle, base64);
+          if (driveUrl && driveUrl.startsWith('http')) {
+            if (currentClassData && currentClassData.cells && currentClassData.cells[selectedCellIdx]) {
+              currentClassData.cells[selectedCellIdx].imgUrl = driveUrl;
+              try {
+                localStorage.setItem(`opm_img_${currentClassId}_${selectedCellIdx}`, driveUrl);
+              } catch (e) { }
             }
-            await DB.updClass(currentClassId, { cells: currentClassData.cells });
-          } catch (err) {
-            console.warn('드라이브 전송 백그라운드:', err);
           }
-        })();
+          // 구글 시트에 완료 상태 확실히 저장
+          await DB.updClass(currentClassId, { cells: currentClassData.cells });
+        } catch (err) {
+          console.warn('드라이브/시트 전송:', err);
+        }
+
+        hideToast();
+        showToast('미션 인증이 완료되었습니다! 🎯', 2000);
+        renderGrid(currentClassData);
 
       } catch (err) {
         console.error('업로드 예외:', err);
-        showModal('사진 처리 중 오류가 발생했습니다.');
+        hideToast();
+        showModal('사진 처리 중 오류가 발생했습니다.\n다시 시도해주세요.');
       } finally {
         e.target.value = '';
       }
@@ -2501,7 +2677,7 @@
       const w = document.getElementById('feedback-writer').value.trim();
       const t = document.getElementById('feedback-text').value.trim();
       if (!w || !t) return showModal('이름과 소감 내용을 모두 입력해주세요.');
-      
+
       showToast('소감이 등록되었습니다! ✍️', 1500);
       await DB.addFeedback(currentClassId, currentClassName, w, t);
       document.getElementById('feedback-text').value = '';
@@ -2591,7 +2767,7 @@
         data.cells.forEach(c => {
           if (c.completed) comp++;
           const mc = document.createElement('div');
-          
+
           if (c.completed) {
             // ★ 완료된 미션: 굵은 X 표시로 확실하게 시각화
             mc.className = 'mini-cell done-cell';
@@ -2633,7 +2809,7 @@
       let all = await DB.getAllClasses();
       const cont = document.getElementById('admin-overview-cards');
       cont.innerHTML = '';
-      
+
       const sorted = CLASSES.map(c => all.find(a => a.id === c.id) || { id: c.id, name: c.name, cells: [] });
       sorted.forEach(d => {
         const comp = (d.cells || []).filter(c => c.completed).length;
@@ -2747,10 +2923,29 @@
     window.toggleScriptInfo = toggleScriptInfo;
 
     /* ═══════════════════════════════════════════════════════════
-       ★ 초기화
+       ★ 초기화 및 세션 복원
        ═══════════════════════════════════════════════════════════ */
     rebuildClassSelect();
-    initConfig();
+    initConfig().then(() => {
+      // 페이지 새로고침 시 기존 미션 화면 자동 복원
+      try {
+        const savedSession = sessionStorage.getItem('opm_active_session');
+        if (savedSession) {
+          const sess = JSON.parse(savedSession);
+          if (sess.role === 'student' && sess.classId) {
+            unlockIntro(true);
+            document.getElementById('briefing-section').classList.add('gone');
+            document.getElementById('student-view').classList.add('on');
+            loadClassData(sess.classId, sess.className);
+          } else if (sess.role === 'admin') {
+            unlockIntro(true);
+            document.getElementById('briefing-section').classList.add('gone');
+            document.getElementById('admin-view').classList.add('on');
+            initAdmin();
+          }
+        }
+      } catch (e) { }
+    });
   </script>
 </body>
 
