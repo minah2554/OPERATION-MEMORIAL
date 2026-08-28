@@ -6,8 +6,8 @@
   <meta name="description" content="전쟁기념관 현장체험학습 미션 빙고 — 작전명 메모리얼">
   <title>OPERATION: MEMORIAL</title>
 
-  <!-- ★ 구름 파비콘 (투명 배경) -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 65'%3E%3Cpath d='M80,55 C83,55 86,52 86,49 C86,46 84,43 81,42 C81,37 77,33 72,33 C70,27 65,23 58,23 C55,23 52,24 50,26 C48,23 45,21 41,21 C35,21 30,26 30,31 C29,31 28,31 27,31 C21,31 16,36 16,43 C16,50 21,55 28,55 Z' fill='%23f59e0b'/%3E%3C/svg%3E">
+  <!-- ★ 교차 전투검(Crossed Swords) 파비콘 (투명 배경) -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f59e0b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14.5 17.5L3 6V3h3l11.5 11.5'/%3E%3Cpath d='M13 19l6-6'/%3E%3Cpath d='M16 16l4 4'/%3E%3Cpath d='M19 21l2-2'/%3E%3Cpath d='M9.5 17.5L21 6V3h-3L6.5 14.5'/%3E%3Cpath d='M11 19l-6-6'/%3E%3Cpath d='M8 16l-4 4'/%3E%3Cpath d='M5 21l-2-2'/%3E%3C/svg%3E">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -285,25 +285,54 @@
     #loader.on { display:flex; }
     .spin-ring { width:48px; height:48px; border-radius:50%; border:2px solid rgba(245,158,11,.2); border-top-color:var(--amber); animation:spin .8s linear infinite; }
 
-    /* ── 푸터 ── */
+    /* ── 푸터 (간결하고 컴팩트한 레이아웃) ── */
     footer {
-      width:100%; background:#090d1a; border-top:1px solid var(--border);
-      padding:1.75rem 1.5rem 1.5rem; margin-top:auto;
+      width: 100%;
+      background: #080c18;
+      border-top: 1px solid var(--border);
+      padding: 0.85rem 1rem;
+      margin-top: auto;
     }
     .footer-inner {
-      max-width:960px; margin:0 auto;
-      display:flex; flex-direction:column; align-items:center; gap:1rem;
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35rem;
+      text-align: center;
     }
-    .footer-brand { display:flex; align-items:center; gap:.75rem; }
-    .footer-cloud-icon svg { width:36px; height:24px; }
-    .footer-info { display:flex; flex-direction:column; }
-    .footer-name { font-weight:900; font-size:.9rem; color:#e2e8f0; letter-spacing:.04em; }
-    .footer-tag  { font-size:.65rem; color:var(--amber); margin-top:.1rem; }
-    .footer-divider { width:100%; max-width:400px; height:1px; background:var(--border); }
-    .footer-legal { text-align:center; font-size:.65rem; color:var(--muted); line-height:1.7; }
-    .footer-links { display:flex; gap:1rem; justify-content:center; }
-    .footer-links a { font-size:.65rem; color:var(--muted); text-decoration:none; transition:color .2s; }
-    .footer-links a:hover { color:var(--amber); }
+    .footer-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+    .footer-sword-icon {
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .footer-sword-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+    .footer-name {
+      font-weight: 800;
+      font-size: 0.78rem;
+      color: #e2e8f0;
+      letter-spacing: 0.04em;
+    }
+    .footer-tag {
+      font-size: 0.65rem;
+      color: var(--amber);
+    }
+    .footer-legal {
+      font-size: 0.62rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
 
     /* ── 공통 유틸 ── */
     .ta   { color:var(--amber); }
@@ -359,15 +388,15 @@
 
       <div class="hud info-card" style="border-left:3px solid var(--amber);text-align:left">
         <div class="info-card-title ta"><i class="fa-solid fa-folder-open"></i> 작전 개요</div>
-        <p>기념관 내부에 봉인된 역사적 아카이브를 복구해야 합니다. 각 편대(반)별로 배정된 전시 구역을 탐색하고 사진을 찍어 데이터를 전송하십시오.</p>
+        <p>전쟁기념관 실내·외 전 구역을 자유롭게 탐색하며 역사적 아카이브를 복구해야 합니다. 각 편대(반)별로 배정된 작전 테마에 맞는 전시품을 찾고 사진을 촬영하여 전송하십시오.</p>
       </div>
 
       <div class="hud info-card" style="border-left:3px solid var(--green);text-align:left;margin-top:.75rem">
         <div class="info-card-title tg"><i class="fa-solid fa-list-check"></i> 행동 수칙</div>
         <ul>
           <li><b style="color:#fff">1. 완전 해독 필수:</b> 16칸의 빙고판을 <b style="color:#6ee7b7">모두 채워야</b> 작전이 완료됩니다.</li>
-          <li><b style="color:var(--amber)">2. 극비 지령:</b> <b style="color:var(--amber)">금색 테두리 4칸</b>은 필수 특별 미션입니다. 반드시 완수하세요.</li>
-          <li><b style="color:#fff">3. 자유 탐색:</b> 나머지 12칸은 배정된 전시 구역에서 자유롭게 사진을 찍어 채우세요.</li>
+          <li><b style="color:var(--amber)">2. 극비 지령 (4칸):</b> <b style="color:var(--amber)">금색 테두리</b>는 필수 특별 미션(선생님 접선 등)입니다.</li>
+          <li><b style="color:#fff">3. 자유 탐색 (12칸):</b> 배정된 테마에 맞춰 기념관 곳곳을 둘러보고 자유롭게 전시품을 촬영하세요.</li>
           <li><b style="color:#fff">4. 작전 로그:</b> 관람 후 아래 MISSION LOG에 소감을 한 줄 남기세요.</li>
         </ul>
       </div>
@@ -403,10 +432,10 @@
     <!-- 테마 배정 대기 -->
     <div id="theme-draw">
       <i class="fa-solid fa-shuffle" style="font-size:2.5rem;color:var(--green);margin-bottom:1rem;animation:pulse 1.5s infinite"></i>
-      <h3 style="font-size:1.05rem;font-weight:700;margin-bottom:.5rem">전시 구역 배정 대기중</h3>
-      <p style="font-size:.78rem;color:var(--muted);line-height:1.7;margin-bottom:1.5rem">버튼을 눌러 탐색할 전시 구역을 배정받으세요.<br>한 번 배정되면 바꿀 수 없습니다.</p>
+      <h3 style="font-size:1.05rem;font-weight:700;margin-bottom:.5rem">작전 테마 배정 대기중</h3>
+      <p style="font-size:.78rem;color:var(--muted);line-height:1.7;margin-bottom:1.5rem">버튼을 눌러 우리 반의 탐색 작전 테마를 배정받으세요.<br>기념관 전 구역을 둘러보며 테마에 맞는 전시품을 찾습니다.<br><span style="color:var(--amber);font-size:.72rem">(한 번 배정되면 바꿀 수 없습니다)</span></p>
       <button id="btn-draw-theme" class="btn-primary" style="max-width:280px">
-        <i class="fa-solid fa-dice" style="margin-right:.4rem"></i>전시 구역 배정받기
+        <i class="fa-solid fa-dice" style="margin-right:.4rem"></i>작전 테마 배정받기
       </button>
     </div>
 
@@ -487,29 +516,27 @@ function doGet(){return ContentService.createTextOutput('ok');}</pre>
     <span style="font-size:.75rem;color:var(--amber);font-weight:700"><i class="fa-solid fa-eye" style="margin-right:.3rem"></i>모니터링 모드</span>
   </div>
 
+  <!-- ★ 슬림 & 컴팩트 푸터 (Crossed Swords 아이콘 적용) -->
   <footer class="no-print">
     <div class="footer-inner">
       <div class="footer-brand">
-        <!-- ★ 구름 아이콘 (투명 배경) -->
-        <div class="footer-cloud-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 65" fill="none">
-            <path d="M80,55 C83,55 86,52 86,49 C86,46 84,43 81,42 C81,37 77,33 72,33 C70,27 65,23 58,23 C55,23 52,24 50,26 C48,23 45,21 41,21 C35,21 30,26 30,31 C29,31 28,31 27,31 C21,31 16,36 16,43 C16,50 21,55 28,55 Z" fill="#f59e0b"/>
+        <div class="footer-sword-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14.5 17.5L3 6V3h3l11.5 11.5"/>
+            <path d="M13 19l6-6"/>
+            <path d="M16 16l4 4"/>
+            <path d="M19 21l2-2"/>
+            <path d="M9.5 17.5L21 6V3h-3L6.5 14.5"/>
+            <path d="M11 19l-6-6"/>
+            <path d="M8 16l-4 4"/>
+            <path d="M5 21l-2-2"/>
           </svg>
         </div>
-        <div class="footer-info">
-          <span class="footer-name">MINARI STUDIO</span>
-          <span class="footer-tag">Tactical Activity Platform &nbsp;·&nbsp; 작전명 메모리얼</span>
-        </div>
-      </div>
-      <div class="footer-divider"></div>
-      <div class="footer-links">
-        <a href="https://github.com/minah2554/OPERATION-MEMORIAL" target="_blank"><i class="fa-brands fa-github" style="margin-right:.3rem"></i>GitHub</a>
-        <a href="https://operation-memorial.vercel.app" target="_blank"><i class="fa-solid fa-globe" style="margin-right:.3rem"></i>Vercel</a>
-        <a href="https://operation-memorial.web.app" target="_blank"><i class="fa-solid fa-fire-flame-curved" style="margin-right:.3rem"></i>Firebase</a>
+        <span class="footer-name">MINARI STUDIO</span>
+        <span class="footer-tag">· Operation Memorial v2.2</span>
       </div>
       <div class="footer-legal">
-        © 2026 MINARI STUDIO. All rights reserved.&nbsp;&nbsp;|&nbsp;&nbsp;Operation Memorial Web App v2.0<br>
-        본 웹앱의 디자인·소스 코드에 대한 권리는 MINARI STUDIO에 있으며, 무단 복제 및 재배포를 금합니다.
+        © 2026 MINARI STUDIO. All rights reserved.
       </div>
     </div>
   </footer>
@@ -585,38 +612,49 @@ function doGet(){return ContentService.createTextOutput('ok');}</pre>
 
 <script>
 /* ═══════════════════════════════════════════════════════════
-   ★ CONFIG — 여기만 수정하세요
+   ★ CONFIG — 설정 영역
    ═══════════════════════════════════════════════════════════ */
 const SHEET_ID = '1nWCYrJuGPscu5LmVX7nCfmXTgaOEI9ahJmXb2v4TKSg';
 
 // Google Apps Script 웹앱 URL (소감 → 구글시트 저장)
-// 설정 방법: 관리자 뷰 → "구글시트 설정" 버튼 참고
 let APPS_SCRIPT_URL = '';
 
 const FIREBASE_CONFIG = { apiKey:'', projectId:'', storageBucket:'', appId:'' };
 
-// 구글시트 로드 실패 시 사용할 기본 반 목록
+// 기본 반 목록 (구글시트 연동 실패 시 폴백)
 let CLASSES = [
   { id:'class1', name:'1반', pass:'0000' },
   { id:'class2', name:'2반', pass:'2222' },
   { id:'class3', name:'3반', pass:'3333' },
   { id:'class4', name:'4반', pass:'4444' },
 ];
-let ADMIN_PASS_HASH = btoa('admin123'); // 구글시트 설정값으로 덮어씌워짐
+let ADMIN_PASS_HASH = btoa('admin123');
 const TEACHER_NUM_MAX = 30;
 
 /* ═══════════════════════════════════════════════════════════
-   ★ 실제 전쟁기념관 전시 구역 테마
+   ★ 전쟁기념관 전 구역 자유 탐색 작전 테마 (특정 전시실 국한 X)
    ═══════════════════════════════════════════════════════════ */
 const THEMES = [
-  { id:'T1', name:'야외 대형장비 전시장',
-    desc:'전차·항공기·함정 등 실제 군사 대형장비를 탐색하세요.\n(M48 전차, F-86 전투기, 어뢰정 등)' },
-  { id:'T2', name:'6·25 전쟁실',
-    desc:'한국전쟁(1950-53)의 전황·전투·휴전 관련 전시를 탐색하세요.\n(낙동강 방어선, 인천상륙작전, 정전협정 등)' },
-  { id:'T3', name:'전쟁역사실',
-    desc:'고대부터 근현대까지 한국 전쟁역사 전시물을 탐색하세요.\n(임진왜란 거북선, 병인양요, 독립전쟁 등)' },
-  { id:'T4', name:'호국·추모 구역',
-    desc:'평화와 추모를 상징하는 전시 구역을 탐색하세요.\n(형제의 상, 호국추모실, UN참전기념탑 등)' },
+  {
+    id: 'T1',
+    name: '기동 타격 장비 탐색 작전',
+    desc: '야외 및 실내 전 구역을 둘러보며 전차·항공기·자주포·장갑차 등 기동 타격 무기체계를 탐색하세요.'
+  },
+  {
+    id: 'T2',
+    name: '호국 결사 병기 탐색 작전',
+    desc: '기념관 전 구역을 탐색하며 거북선·화포·조총·전통무기 등 국난 극복의 결사 병기들을 찾아보세요.'
+  },
+  {
+    id: 'T3',
+    name: '6·25 격전 유물 탐색 작전',
+    desc: '기념관 곳곳을 둘러보며 전장 유물, 군번표, 철모, 통신장비, 군수품 등 생생한 격전의 흔적을 탐색하세요.'
+  },
+  {
+    id: 'T4',
+    name: '평화 결의 상징 탐색 작전',
+    desc: '실내외 전 구역을 탐색하며 형제의 상, 평화 조형물, 참전 기념비, 호국 명비 등 평화의 상징을 찾아보세요.'
+  },
 ];
 
 /* ═══════════════════════════════════════════════════════════
@@ -632,7 +670,6 @@ async function loadSheetJSON(sheetName) {
 
 async function initConfig() {
   try {
-    // 반 목록 로드
     const classRows = await loadSheetJSON('반목록');
     if (classRows.length) {
       const loaded = classRows
@@ -644,7 +681,6 @@ async function initConfig() {
         .filter(c => c.name);
       if (loaded.length) { CLASSES = loaded; console.info('[Sheet] 반 목록 로드됨:', loaded.length+'개'); }
     }
-    // 설정(관리자 비번) 로드
     const settingRows = await loadSheetJSON('설정');
     const adminRow = settingRows.find(r => String(r.c?.[0]?.v) === '관리자비밀번호');
     if (adminRow?.c?.[1]?.v) ADMIN_PASS_HASH = btoa(String(adminRow.c[1].v));
@@ -677,7 +713,7 @@ async function postFeedbackToSheet(classId, writer, text) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ★ Firebase / localStorage DB 레이어
+   ★ DB 레이어 (Firebase / localStorage)
    ═══════════════════════════════════════════════════════════ */
 let USE_FB = false;
 let db_fb, storage_fb;
@@ -779,7 +815,7 @@ let classUnsub       = null;
 let feedbackUnsub    = null;
 let hasCleared       = false;
 let modalCb          = null;
-let isAdminLogin     = false; // 관리자 전용 로그인 플래그
+let isAdminLogin     = false;
 
 /* ═══════════════════════════════════════════════════════════
    ★ 인트로
@@ -871,7 +907,6 @@ document.getElementById('btn-login').onclick = async () => {
   const pass  = document.getElementById('login-password').value.trim();
   const clsId = document.getElementById('login-class-select').value;
 
-  // 관리자 로그인
   if (btoa(pass) === ADMIN_PASS_HASH || isAdminLogin && btoa(pass) === ADMIN_PASS_HASH) {
     document.getElementById('login-modal').classList.remove('on');
     document.getElementById('admin-view').classList.add('on');
@@ -882,7 +917,6 @@ document.getElementById('btn-login').onclick = async () => {
 
   if (isAdminLogin) { return showModal('관리자 보안 코드가 일치하지 않습니다.'); }
 
-  // 학생 로그인
   const cls = CLASSES.find(c => c.id === clsId);
   if (cls && cls.pass === pass) {
     currentClassId   = clsId;
@@ -911,11 +945,11 @@ async function loadClassData(clsId, clsName) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ★ 테마 배정
+   ★ 테마 배정 (전 구역 탐색)
    ═══════════════════════════════════════════════════════════ */
 document.getElementById('btn-draw-theme').onclick = () => {
   showModal(
-    '전시 구역을 배정하시겠습니까?\n<span style="color:var(--amber);font-size:.8rem">한 번 배정되면 바꿀 수 없습니다.</span>',
+    '작전 테마를 배정하시겠습니까?<br><span style="color:var(--amber);font-size:.8rem">기념관 전 구역을 둘러보며 테마에 맞는 전시품을 찾습니다.<br>(한 번 배정되면 바꿀 수 없습니다)</span>',
     true, async ok => {
       if(!ok) return;
       showLoading(true);
@@ -938,11 +972,11 @@ function makeInitialCells() {
     { title:'선생님 접선',    desc:'담임 선생님 + 추첨 번호 학생 함께 사진 촬영', isSpecial:true, isTeacher:true },
     { title:'반 단체 사진',   desc:'우리 반 모두 함께 단체 사진 촬영',             isSpecial:true, isTeacher:false },
     { title:'전시실 전경 샷', desc:'전시실 내부 전경이 보이게 촬영',               isSpecial:true, isTeacher:false },
-    { title:'친구와 함께',    desc:'전쟁·평화 전시물 앞에서 친구와 함께 촬영',     isSpecial:true, isTeacher:false },
+    { title:'친구와 함께',    desc:'전시물 앞에서 친구와 함께 촬영',                 isSpecial:true, isTeacher:false },
   ];
   specialIdx.forEach((idx,i) => cells[idx] = {id:idx, ...specials[i], completed:false, imgUrl:''});
 
-  // 나머지 12칸: 자유 탐색 촬영
+  // 나머지 12칸: 전 구역 자유 탐색 촬영 (1~12)
   let n=1;
   for(let i=0; i<16; i++) {
     if(!cells[i]) cells[i] = {id:i, title:`자유 탐색 촬영`, freeNum:n++, isSpecial:false, isTeacher:false, completed:false, imgUrl:''};
@@ -958,7 +992,7 @@ function renderGrid(data) {
   const grid        = document.getElementById('bingo-grid');
 
   if (!data.themeName) {
-    document.getElementById('st-theme-name').innerHTML = '<i class="fa-solid fa-crosshairs ta"></i> 전시 구역 배정 대기중';
+    document.getElementById('st-theme-name').innerHTML = '<i class="fa-solid fa-crosshairs ta"></i> 테마 대기중';
     drawSection.classList.add('on'); grid.classList.remove('on');
     document.getElementById('st-prog-cnt').textContent = '0';
     document.getElementById('st-prog-bar').style.width = '0%';
@@ -984,7 +1018,7 @@ function renderGrid(data) {
         </div>`;
     } else {
       let label = cell.isSpecial ? cell.title : `자유 탐색 ${cell.freeNum||''}`;
-      let sub   = cell.isSpecial ? cell.desc  : '📸 자유롭게 촬영';
+      let sub   = cell.isSpecial ? cell.desc  : '📸 전시장 둘러보고 촬영';
       if(cell.isTeacher) {
         label = data.teacherNum ? `선생님+${data.teacherNum}번` : '👑 번호 추첨 전';
         sub   = data.teacherNum ? `${data.teacherNum}번 학생과 함께` : '탭하여 번호 추첨';
@@ -1016,7 +1050,6 @@ function renderGrid(data) {
    ★ 셀 클릭
    ═══════════════════════════════════════════════════════════ */
 async function handleCellClick(cell, data) {
-  // 완료된 셀 → 사진 미리보기
   if(cell.completed && cell.imgUrl) {
     selectedCellIdx = cell.id;
     document.getElementById('preview-title').textContent = cell.title;
@@ -1028,7 +1061,6 @@ async function handleCellClick(cell, data) {
   // 선생님 접선 미션
   if(cell.isTeacher) {
     if(!data.teacherNum) {
-      // 번호 미추첨 → 안내 후 추첨
       showModal(
         `📸 <b>특별 미션 : 선생님 접선</b><br><br>
          버튼을 누르면 담임 선생님과<br>함께 사진 찍을 <b>학생 번호</b>가 추첨됩니다.<br><br>
@@ -1056,14 +1088,13 @@ async function handleCellClick(cell, data) {
         }
       );
     } else {
-      // 이미 번호 추첨됨 → 사진 촬영
       selectedCellIdx = cell.id;
       document.getElementById('file-uploader').click();
     }
     return;
   }
 
-  // 일반 / 다른 특별 미션
+  // 일반 및 기타 특별 미션
   selectedCellIdx = cell.id;
   document.getElementById('file-uploader').click();
 }
@@ -1157,17 +1188,13 @@ async function initAdmin() {
 
 function buildAdminTabs() {
   const tabBar = document.getElementById('admin-tabs');
-  // 기존 반별 탭 제거
   tabBar.querySelectorAll('[data-classid]').forEach(t=>t.remove());
-  // 반별 탭 + 패널 생성
   CLASSES.forEach(cls => {
-    // 탭 버튼
     const btn=document.createElement('button');
     btn.className='adm-tab'; btn.dataset.tab=cls.id; btn.dataset.classid=cls.id;
     btn.textContent=cls.name;
     btn.onclick=()=>switchAdminTab(cls.id);
     tabBar.appendChild(btn);
-    // 패널 (없으면 생성)
     if(!document.getElementById(`adm-panel-${cls.id}`)) {
       const panel=document.createElement('div');
       panel.id=`adm-panel-${cls.id}`; panel.className='adm-panel';
@@ -1201,7 +1228,6 @@ window.switchAdminTab = switchAdminTab;
 async function loadClassTab(clsId) {
   const data = await DB.getClass(clsId);
   const feedbacks = await DB.getFeedbacks(clsId);
-  // 미니 빙고
   const miniGrid = document.getElementById(`mini-grid-${clsId}`);
   const miniStat = document.getElementById(`mini-stat-${clsId}`);
   if(miniGrid && data?.cells) {
@@ -1216,7 +1242,6 @@ async function loadClassTab(clsId) {
     });
     miniStat.textContent=`${comp}/16 완료`;
   }
-  // 소감
   const fbList=document.getElementById(`cls-fb-list-${clsId}`);
   const fbCnt =document.getElementById(`cls-fb-cnt-${clsId}`);
   if(fbList) {
@@ -1332,7 +1357,7 @@ window.toggleScriptInfo = toggleScriptInfo;
    ★ 초기화
    ═══════════════════════════════════════════════════════════ */
 rebuildClassSelect();
-initConfig(); // 구글시트에서 비동기 로드 (성공 시 반 목록 갱신)
+initConfig();
 </script>
 </body>
 </html>
