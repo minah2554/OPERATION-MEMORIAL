@@ -1240,12 +1240,23 @@
       color: var(--text);
     }
 
-    /* ── 로딩 토스트 (가운데 하단 배치) ── */
+    @keyframes toastFadeIn {
+      from {
+        opacity: 0;
+        transform: translate(-50%, 14px);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+    }
+
+    /* ── 로딩 토스트 (가운데 하단 고정 - 좌우 점핑 버그 완전 해결) ── */
     #loader {
       position: fixed;
-      bottom: 2rem;
+      bottom: 2.2rem;
       left: 50%;
-      transform: translateX(-50%);
+      transform: translate(-50%, 0);
       z-index: 80;
       background: rgba(15, 23, 42, 0.96);
       border: 1.5px solid var(--amber);
@@ -1256,12 +1267,12 @@
       align-items: center;
       gap: .65rem;
       backdrop-filter: blur(10px);
-      animation: fadeInUp .2s ease;
       white-space: nowrap;
     }
 
     #loader.on {
       display: flex;
+      animation: toastFadeIn 0.25s ease-out forwards;
     }
 
     .spin-ring {
@@ -1512,9 +1523,12 @@
             <span class="log-hint">관람 후 작성</span>
           </div>
         </div>
+        <p style="font-size: clamp(0.74rem, 3.2vw, 0.82rem); color: #fde68a; margin-bottom: 0.65rem; font-weight: 700; line-height: 1.4; display: flex; align-items: center; gap: 0.35rem;">
+          <i class="fa-solid fa-circle-info" style="color: var(--amber);"></i>인상 깊었던 전시물과 소감을 기록하세요.
+        </p>
         <div class="log-inputs">
           <input type="text" id="feedback-writer" class="field" placeholder="이름/닉네임" maxlength="10">
-          <input type="text" id="feedback-text" class="field" placeholder="인상 깊었던 전시물과 소감을 기록하세요" maxlength="100">
+          <input type="text" id="feedback-text" class="field" placeholder="소감 한마디를 남겨주세요" maxlength="100">
           <button id="btn-log-submit" class="btn-log">등록</button>
         </div>
         <div id="feedback-list"></div>
@@ -1954,6 +1968,7 @@
        ═══════════════════════════════════════════════════════════ */
     let currentClassId = null;
     let currentClassName = '';
+    let currentClassData = null; // 메모리 상의 활성 학급 데이터 (즉각 렌더링용)
     let isAdminMonitor = false;
     let selectedCellIdx = null;
     let pollingTimer = null;
@@ -2255,6 +2270,8 @@
       const grid = document.getElementById('bingo-grid');
       const themeCard = document.getElementById('st-theme-card');
 
+      currentClassData = data;
+
       lastRenderedStateJson = JSON.stringify({
         themeName: data?.themeName,
         teacherNum: data?.teacherNum,
@@ -2291,7 +2308,7 @@
           // 썸네일 캐시 안전 복원
           const cachedImg = localStorage.getItem(`opm_img_${currentClassId}_${cell.id}`);
           const imgSrc = cell.imgUrl || cachedImg || 'https://images.unsplash.com/photo-1590496793929-36417d3117de?auto=format&fit=crop&w=400&q=80';
-          if (cell.imgUrl) {
+          if (cell.imgUrl && !cell.imgUrl.startsWith('blob:')) {
             try { localStorage.setItem(`opm_img_${currentClassId}_${cell.id}`, cell.imgUrl); } catch(e){}
           }
           const missionLabel = (cell.isTeacher && data.teacherNum) ? `선생님+${data.teacherNum}번` : (cell.isSpecial ? cell.title : `자유 탐색 ${cell.freeNum || ''}`);
@@ -2300,7 +2317,7 @@
             <div style="position:absolute;inset:0;background:rgba(0,0,0,0.48);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:.2rem;border-radius:inherit;">
               <i class="fa-solid fa-circle-check" style="color:#10b981;font-size:1.1rem;margin-bottom:.2rem;text-shadow:0 0 8px rgba(16,185,129,0.8)"></i>
               <span class="bc-label" style="color:#fff;font-weight:800;font-size:.62rem;text-shadow:0 1px 4px #000">${missionLabel}</span>
-              <span class="cell-status-badge">📸 인증 확인 중</span>
+              <span class="cell-status-badge">📸 인증 완료</span>
             </div>`;
         } else {
           let label = cell.isSpecial ? cell.title : `자유 탐색 ${cell.freeNum || ''}`;
@@ -2396,37 +2413,45 @@
     }
 
     /* ═══════════════════════════════════════════════════════════
-       ★ 초고속 사진 업로드 & 드라이브 자동 저장
+       ★ 초고속 사진 업로드 & 드라이브 자동 저장 (즉각 0.001초 피드백)
        ═══════════════════════════════════════════════════════════ */
     document.getElementById('file-uploader').onchange = async e => {
       const file = e.target.files[0];
       if (!file || selectedCellIdx === null) return;
       
       try {
-        showToast('사진 처리 및 인증 저장중...', 0);
-        const base64 = await compressImgToBase64(file);
-        
-        // 1. UI 즉시 썸네일 표시
-        const d = await DB.getClass(currentClassId);
-        const cells = [...d.cells];
-        const cell = cells[selectedCellIdx];
-        const cellTitle = cell ? cell.title : '미션';
-        
-        cells[selectedCellIdx].completed = true;
-        cells[selectedCellIdx].imgUrl = base64; // 로컬 즉시 표시
-        renderGrid({ ...d, cells });
-        showToast('인증 완료! 구글 드라이브 동기화중... ☁️', 2500);
+        showToast('인증 확인 중', 2000);
 
-        // 2. 백그라운드 구글 드라이브 및 구글 시트 저장
+        // 1. 즉시 로컬 Blob URL 생성하여 화면에 0.001초만에 즉각 반영
+        const localBlobUrl = URL.createObjectURL(file);
+        if (currentClassData && currentClassData.cells && currentClassData.cells[selectedCellIdx]) {
+          currentClassData.cells[selectedCellIdx].completed = true;
+          currentClassData.cells[selectedCellIdx].imgUrl = localBlobUrl;
+          renderGrid(currentClassData);
+        }
+
+        // 2. 비동기 백그라운드 압축 및 저장
+        const base64 = await compressImgToBase64(file);
+        try {
+          localStorage.setItem(`opm_img_${currentClassId}_${selectedCellIdx}`, base64);
+        } catch (err) {}
+
+        const cellTitle = currentClassData?.cells?.[selectedCellIdx]?.title || '미션';
+
         (async () => {
           try {
             const driveUrl = await DB.uploadPhoto(currentClassId, currentClassName, selectedCellIdx, cellTitle, base64);
             if (driveUrl && driveUrl.startsWith('http')) {
-              cells[selectedCellIdx].imgUrl = driveUrl;
+              if (currentClassData && currentClassData.cells && currentClassData.cells[selectedCellIdx]) {
+                currentClassData.cells[selectedCellIdx].imgUrl = driveUrl;
+                try {
+                  localStorage.setItem(`opm_img_${currentClassId}_${selectedCellIdx}`, driveUrl);
+                } catch (e) {}
+              }
             }
-            await DB.updClass(currentClassId, { cells });
+            await DB.updClass(currentClassId, { cells: currentClassData.cells });
           } catch (err) {
-            console.warn('드라이브 전송 백그라운드 재시도:', err);
+            console.warn('드라이브 전송 백그라운드:', err);
           }
         })();
 
