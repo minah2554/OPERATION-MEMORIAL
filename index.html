@@ -361,12 +361,17 @@
       background: var(--bg);
       border: 1px solid var(--border2);
       border-radius: .6rem;
-      padding: .75rem 1rem;
+      padding: .65rem .85rem;
       color: var(--text);
-      font-size: .9rem;
+      font-size: clamp(0.74rem, 3.2vw, 0.88rem);
       font-family: inherit;
       outline: none;
       transition: border-color .2s;
+    }
+
+    .field::placeholder {
+      color: #64748b;
+      font-size: clamp(0.68rem, 2.9vw, 0.78rem);
     }
 
     .field:focus {
@@ -544,6 +549,7 @@
 
     /* 빙고 그리드 */
     #bingo-grid {
+      position: relative;
       display: none;
       grid-template-columns: repeat(4, 1fr);
       gap: .45rem;
@@ -556,6 +562,33 @@
 
     #bingo-grid.on {
       display: grid;
+    }
+
+    /* 16칸 완료 대각선 스탬프 */
+    .bingo-cleared-stamp {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-18deg);
+      border: 4.5px dashed #10b981;
+      color: #10b981;
+      font-size: clamp(1.4rem, 6.5vw, 2.3rem);
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      padding: 0.5rem 1.25rem;
+      border-radius: 0.85rem;
+      background: rgba(15, 23, 42, 0.93);
+      box-shadow: 0 0 35px rgba(16, 185, 129, 0.5), inset 0 0 15px rgba(16, 185, 129, 0.25);
+      text-shadow: 0 0 15px rgba(16, 185, 129, 0.9);
+      pointer-events: none;
+      z-index: 30;
+      white-space: nowrap;
+      animation: stampIn 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    @keyframes stampIn {
+      0% { opacity: 0; transform: translate(-50%, -50%) rotate(-32deg) scale(2.3); }
+      100% { opacity: 0.96; transform: translate(-50%, -50%) rotate(-18deg) scale(1); }
     }
 
     .bc {
@@ -591,6 +624,24 @@
     .bc.done {
       border-color: var(--green) !important;
       background: #022c22 !important;
+    }
+
+    /* 가운데 하단 인증 확인 중 배지 */
+    .cell-status-badge {
+      position: absolute;
+      bottom: 0.25rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: clamp(0.44rem, 1.9vw, 0.52rem);
+      color: #fde68a;
+      background: rgba(0, 0, 0, 0.78);
+      border: 1px solid rgba(245, 158, 11, 0.45);
+      border-radius: 999px;
+      padding: 0.12rem 0.45rem;
+      font-weight: 800;
+      white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+      letter-spacing: 0.02em;
     }
 
     .bc-icon {
@@ -1189,22 +1240,24 @@
       color: var(--text);
     }
 
-    /* ── 로딩 토스트 ── */
+    /* ── 로딩 토스트 (가운데 하단 배치) ── */
     #loader {
       position: fixed;
-      bottom: 1.5rem;
-      right: 1.5rem;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
       z-index: 80;
-      background: rgba(15, 23, 42, 0.95);
-      border: 1px solid var(--amber);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      background: rgba(15, 23, 42, 0.96);
+      border: 1.5px solid var(--amber);
+      box-shadow: 0 6px 30px rgba(0, 0, 0, 0.7);
       border-radius: 999px;
-      padding: 0.5rem 1rem;
+      padding: 0.6rem 1.4rem;
       display: none;
       align-items: center;
-      gap: .6rem;
-      backdrop-filter: blur(8px);
+      gap: .65rem;
+      backdrop-filter: blur(10px);
       animation: fadeInUp .2s ease;
+      white-space: nowrap;
     }
 
     #loader.on {
@@ -1461,7 +1514,7 @@
         </div>
         <div class="log-inputs">
           <input type="text" id="feedback-writer" class="field" placeholder="이름/닉네임" maxlength="10">
-          <input type="text" id="feedback-text" class="field" placeholder="인상 깊었던 전시물과 생각" maxlength="100">
+          <input type="text" id="feedback-text" class="field" placeholder="인상 깊었던 전시물과 소감을 기록하세요" maxlength="100">
           <button id="btn-log-submit" class="btn-log">등록</button>
         </div>
         <div id="feedback-list"></div>
@@ -2235,14 +2288,19 @@
         div.className = `bc ${cell.isSpecial ? 'special' : 'normal'} ${cell.completed ? 'done' : ''}`;
 
         if (cell.completed) {
-          const imgSrc = cell.imgUrl || 'https://images.unsplash.com/photo-1590496793929-36417d3117de?auto=format&fit=crop&w=400&q=80';
+          // 썸네일 캐시 안전 복원
+          const cachedImg = localStorage.getItem(`opm_img_${currentClassId}_${cell.id}`);
+          const imgSrc = cell.imgUrl || cachedImg || 'https://images.unsplash.com/photo-1590496793929-36417d3117de?auto=format&fit=crop&w=400&q=80';
+          if (cell.imgUrl) {
+            try { localStorage.setItem(`opm_img_${currentClassId}_${cell.id}`, cell.imgUrl); } catch(e){}
+          }
           const missionLabel = (cell.isTeacher && data.teacherNum) ? `선생님+${data.teacherNum}번` : (cell.isSpecial ? cell.title : `자유 탐색 ${cell.freeNum || ''}`);
           div.innerHTML = `
-            <img src="${imgSrc}" alt="${cell.title}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit;" onerror="this.style.display='none'">
-            <div style="position:absolute;inset:0;background:rgba(0,0,0,0.52);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:.2rem;border-radius:inherit;">
-              <i class="fa-solid fa-circle-check" style="color:#10b981;font-size:1.05rem;margin-bottom:.2rem;text-shadow:0 0 8px rgba(16,185,129,0.8)"></i>
+            <img src="${imgSrc}" alt="${cell.title}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit;" onerror="this.src='https://images.unsplash.com/photo-1590496793929-36417d3117de?auto=format&fit=crop&w=400&q=80'">
+            <div style="position:absolute;inset:0;background:rgba(0,0,0,0.48);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:.2rem;border-radius:inherit;">
+              <i class="fa-solid fa-circle-check" style="color:#10b981;font-size:1.1rem;margin-bottom:.2rem;text-shadow:0 0 8px rgba(16,185,129,0.8)"></i>
               <span class="bc-label" style="color:#fff;font-weight:800;font-size:.62rem;text-shadow:0 1px 4px #000">${missionLabel}</span>
-              <span style="font-size:.48rem;color:#fde68a;margin-top:.15rem;font-weight:700">📸 인증 완료 (확인)</span>
+              <span class="cell-status-badge">📸 인증 확인 중</span>
             </div>`;
         } else {
           let label = cell.isSpecial ? cell.title : `자유 탐색 ${cell.freeNum || ''}`;
@@ -2259,6 +2317,14 @@
         div.onclick = () => handleCellClick(cell, data);
         grid.appendChild(div);
       });
+
+      // 16칸 완성 시 대각선 스탬프 배치
+      if (comp === 16) {
+        const stamp = document.createElement('div');
+        stamp.className = 'bingo-cleared-stamp';
+        stamp.textContent = 'MISSION COMPLETE';
+        grid.appendChild(stamp);
+      }
 
       document.getElementById('st-prog-cnt').textContent = comp;
       document.getElementById('st-prog-bar').style.width = `${Math.round((comp / 16) * 100)}%`;
