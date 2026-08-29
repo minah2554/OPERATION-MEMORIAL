@@ -354,6 +354,60 @@
       color: #fff;
     }
 
+    /* ── 작전 지령 알림 종 버튼 & 배지 ── */
+    .notice-bell-btn {
+      position: relative;
+      padding: .42rem .75rem !important;
+      font-size: .88rem !important;
+      color: #fde68a !important;
+      border: 1px solid rgba(245, 158, 11, 0.4) !important;
+      background: rgba(15, 23, 42, 0.8) !important;
+      border-radius: .55rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .notice-bell-btn:hover {
+      background: rgba(30, 41, 59, 0.9) !important;
+    }
+
+    .notice-bell-btn.has-unread {
+      color: #ef4444 !important;
+      border-color: rgba(239, 68, 68, 0.7) !important;
+      background: rgba(239, 68, 68, 0.12) !important;
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+      animation: bellRing 2.2s infinite ease-in-out;
+    }
+
+    @keyframes bellRing {
+      0%, 100% { transform: rotate(0); }
+      10%, 30% { transform: rotate(14deg); }
+      20%, 40% { transform: rotate(-14deg); }
+      50% { transform: rotate(0); }
+    }
+
+    .notice-badge-cnt {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: #ef4444;
+      color: #fff;
+      font-size: 0.6rem;
+      font-weight: 900;
+      min-width: 17px;
+      height: 17px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.9);
+      border: 1.5px solid #0f172a;
+    }
+
     /* ── 모달 오버레이 ── */
     .modal-ov {
       position: fixed;
@@ -1512,14 +1566,19 @@
 
     <!-- 학생 뷰 -->
     <div id="student-view">
-      <!-- 상단 내비게이션 & 홈으로 버튼 -->
+      <!-- 상단 내비게이션 & 홈으로 버튼 & 작전 지령 알림 종 -->
       <div class="st-top-nav">
         <button onclick="returnToHome()" class="btn-ghost"
           style="padding:.38rem .85rem;font-size:.75rem;display:inline-flex;align-items:center;gap:.4rem;font-weight:700">
           <i class="fa-solid fa-house"></i> 홈으로
         </button>
-        <div style="display:flex;align-items:center;gap:.5rem">
-          <span class="sync-badge"><i class="fa-solid fa-arrows-rotate"></i> 실시간 연동중</span>
+        <div style="display:flex;align-items:center;gap:.45rem">
+          <!-- ★ 작전 지령 알림 종 (숫자 배지) -->
+          <button id="btn-notice-bell" class="btn-ghost notice-bell-btn" onclick="openNoticeModalManually()" title="작전 지령 알림">
+            <i class="fa-solid fa-bell"></i>
+            <span id="notice-badge-cnt" class="notice-badge-cnt hidden">0</span>
+          </button>
+          <span class="sync-badge"><i class="fa-solid fa-arrows-rotate"></i> 연동중</span>
           <span class="unit-tag" id="st-class-title">UNIT</span>
         </div>
       </div>
@@ -1747,20 +1806,35 @@
   </div>
 
   <!-- ── 긴급 작전 지령 팝업 모달 ── -->
-  <div id="notice-modal" class="modal-ov" style="z-index: 120;">
-    <div class="hud modal-box" style="border:2px solid #ef4444;box-shadow:0 0 40px rgba(239,68,68,0.5);text-align:center;max-width:380px;background:rgba(15,23,42,0.98)">
-      <div style="font-size:2.4rem;color:#ef4444;margin-bottom:.6rem;animation:pulse 1.2s infinite">
+  <div id="notice-modal" class="modal-ov" style="z-index: 120;" onclick="if(event.target===this)closeNoticeModal()">
+    <div class="hud modal-box" style="border:2px solid #ef4444;box-shadow:0 0 40px rgba(239,68,68,0.5);text-align:center;max-width:390px;background:rgba(15,23,42,0.98);padding:1.6rem 1.3rem;position:relative">
+      <button onclick="closeNoticeModal()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer"><i class="fa-solid fa-xmark"></i></button>
+
+      <!-- ★ 주의 아이콘 완벽 가운데 정렬 -->
+      <div style="display:flex;justify-content:center;align-items:center;width:100%;font-size:2.4rem;color:#ef4444;margin-bottom:.5rem;animation:pulse 1.2s infinite">
         <i class="fa-solid fa-triangle-exclamation"></i>
       </div>
-      <div style="display:inline-block;font-size:.68rem;font-weight:900;letter-spacing:.08em;color:#fca5a5;background:rgba(239,68,68,0.18);border:1px solid rgba(239,68,68,0.5);padding:.25rem .75rem;border-radius:999px;margin-bottom:.6rem" id="notice-modal-badge">
+
+      <div style="display:inline-flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;letter-spacing:.08em;color:#fca5a5;background:rgba(239,68,68,0.18);border:1px solid rgba(239,68,68,0.5);padding:.25rem .75rem;border-radius:999px;margin-bottom:.5rem" id="notice-modal-badge">
         COMMAND NOTICE
       </div>
-      <h3 style="font-size:1.15rem;font-weight:900;color:#fff;margin-bottom:.85rem;letter-spacing:.04em">🚨 긴급 작전 본부 지령</h3>
-      <div id="notice-modal-content" style="font-size:.95rem;font-weight:700;color:#fde68a;line-height:1.6;background:rgba(0,0,0,0.4);border-radius:.6rem;padding:.9rem 1rem;margin-bottom:1.1rem;word-break:keep-all;border:1px dashed rgba(245,158,11,0.4)">
-        지령 내용
+      <h3 style="font-size:1.15rem;font-weight:900;color:#fff;margin-bottom:.75rem;letter-spacing:.04em">🚨 긴급 작전 본부 지령</h3>
+
+      <!-- 최신 지령 카드 -->
+      <div id="notice-modal-content" style="font-size:.92rem;font-weight:700;color:#fde68a;line-height:1.6;background:rgba(0,0,0,0.4);border-radius:.6rem;padding:.85rem .95rem;margin-bottom:.4rem;word-break:keep-all;border:1px dashed rgba(245,158,11,0.4);text-align:center">
+        수신된 작전 지령이 없습니다.
       </div>
-      <div style="font-size:.68rem;color:var(--muted);margin-bottom:1.25rem" id="notice-modal-time"></div>
-      <button id="btn-notice-confirm" class="btn-primary" style="background:#ef4444;color:#fff;box-shadow:0 0 15px rgba(239,68,68,0.4)">
+      <div style="font-size:.65rem;color:var(--muted);margin-bottom:.85rem;text-align:center" id="notice-modal-time"></div>
+
+      <!-- 이전 지령 목록 (히스토리) -->
+      <div id="notice-history-box" style="margin-bottom:1rem;display:none;text-align:left">
+        <div style="font-size:.72rem;font-weight:700;color:#94a3b8;margin-bottom:.4rem;display:flex;align-items:center;gap:.35rem">
+          <i class="fa-solid fa-clock-rotate-left"></i> 지난 지령 기록
+        </div>
+        <div id="notice-history-list" style="max-height:120px;overflow-y:auto;display:flex;flex-direction:column;gap:.35rem"></div>
+      </div>
+
+      <button id="btn-notice-confirm" class="btn-primary" style="background:#ef4444;color:#fff;box-shadow:0 0 15px rgba(239,68,68,0.4);width:100%;font-size:.9rem;padding:.85rem" onclick="closeNoticeModal()">
         <i class="fa-solid fa-check" style="margin-right:.4rem"></i>지령 확인 완료
       </button>
     </div>
@@ -1790,7 +1864,7 @@
     /* ═══════════════════════════════════════════════════════════
        ★ CONFIG — 설정 영역
        ═══════════════════════════════════════════════════════════ */
-    const DATA_VERSION = 'v20260829_r2';
+    const DATA_VERSION = 'v20260829_r4';
     const SHEET_ID = '1nWCYrJuGPscu5LmVX7nCfmXTgaOEI9ahJmXb2v4TKSg';
     const DRIVE_FOLDER_ID = '1Ixoi6vlBTXfHvm6OKNILbVSu6G9MmbAQ';
 
@@ -2275,40 +2349,47 @@
         return noticeObj;
       },
 
-      async getNotice(classId) {
+      async getNoticeList() {
         try {
           // 1순위: Apps Script 실시간 직통 조회
           const res = await callGAS('getFeedbacks', { classId: 'COMMAND_NOTICE', className: '작전지령' });
           if (res && res.success && res.list && res.list.length > 0) {
-            const lastItem = res.list[res.list.length - 1];
-            if (lastItem && lastItem.text) {
-              const parsed = JSON.parse(lastItem.text);
-              if (parsed && parsed.id && parsed.text) {
-                return parsed;
-              }
+            const list = [];
+            for (const item of res.list) {
+              try {
+                const parsed = JSON.parse(item.text);
+                if (parsed && parsed.id && parsed.text) {
+                  list.push(parsed);
+                }
+              } catch (e) { }
             }
+            if (list.length) return list;
           }
         } catch (e) { }
 
         try {
           // 2순위: 구글 시트 '작전로그' 탭 직접 조회 (캐시 fallback)
           const rows = await loadSheetJSON('작전로그');
-          for (let i = rows.length - 1; i >= 0; i--) {
+          const list = [];
+          for (let i = 0; i < rows.length; i++) {
             const r = rows[i].c;
             if (r && String(r[1]?.v || '') === 'COMMAND' && r[2]?.v) {
-              const parsed = JSON.parse(String(r[2].v));
-              if (parsed && parsed.id && parsed.text) {
-                return parsed;
-              }
+              try {
+                const parsed = JSON.parse(String(r[2].v));
+                if (parsed && parsed.id && parsed.text) {
+                  list.push(parsed);
+                }
+              } catch (e) { }
             }
           }
+          if (list.length) return list;
         } catch (e) { }
 
         try {
           const localNotice = localStorage.getItem('opm_latest_notice');
-          if (localNotice) return JSON.parse(localNotice);
+          if (localNotice) return [JSON.parse(localNotice)];
         } catch (e) { }
-        return null;
+        return [];
       },
 
       async resetAll() {
@@ -3258,56 +3339,140 @@
     window.passCell = passCell;
 
     /* ═══════════════════════════════════════════════════════════
-       ★ 긴급 작전 지령 팝업 시스템 (관리자 방송 & 실시간 팝업 수신)
+       ★ 긴급 작전 지령 팝업 & 알림 종 시스템
        ═══════════════════════════════════════════════════════════ */
-    async function checkAndShowNotice() {
+    let lastFetchedNotices = [];
+
+    // 실시간 폴링 시 지령 확인 및 알림 종 배지 갱신 / 자동 팝업
+    async function checkAndShowNotice(autoPopup = true) {
       if (!currentClassId) return;
       try {
-        const notice = await DB.getNotice(currentClassId);
-        if (notice && notice.id && notice.text) {
-          const isTarget = (notice.target === 'all' || notice.target === currentClassId);
-          const lastReadId = localStorage.getItem(`opm_read_notice_${currentClassId}`);
-          if (isTarget && lastReadId !== notice.id) {
-            const badgeText = notice.target === 'all' ? '📢 전체 학급 작전 지령' : `📢 ${currentClassName} 전용 지령`;
-            document.getElementById('notice-modal-badge').textContent = badgeText;
-            document.getElementById('notice-modal-content').textContent = notice.text;
-            document.getElementById('notice-modal-time').textContent = `발신 시각: ${notice.time || '방금 전'}`;
-            document.getElementById('notice-modal').classList.add('on');
+        const allList = await DB.getNoticeList();
+        lastFetchedNotices = allList;
 
+        // 현재 반에 해당되는 지령 필터링 ('all' 또는 현재 반 id)
+        const myNotices = allList.filter(n => n.target === 'all' || n.target === currentClassId);
+
+        // 로컬에 저장된 읽음 지령 ID 목록
+        const readIds = JSON.parse(localStorage.getItem(`opm_read_ids_${currentClassId}`) || '[]');
+        const unreadList = myNotices.filter(n => !readIds.includes(n.id));
+
+        // 1. 상단 알림 종(Bell) 배지 갱신
+        const badgeEl = document.getElementById('notice-badge-cnt');
+        const bellBtn = document.getElementById('btn-notice-bell');
+        if (badgeEl && bellBtn) {
+          if (unreadList.length > 0) {
+            badgeEl.textContent = unreadList.length;
+            badgeEl.classList.remove('hidden');
+            bellBtn.classList.add('has-unread');
+          } else {
+            badgeEl.classList.add('hidden');
+            bellBtn.classList.remove('has-unread');
+          }
+        }
+
+        // 2. 새로운 지령 도착 시 자동 팝업 (1회만)
+        if (autoPopup && unreadList.length > 0) {
+          const latestUnread = unreadList[unreadList.length - 1];
+          const lastAutoPopupId = sessionStorage.getItem(`opm_last_auto_notice_${currentClassId}`);
+          if (lastAutoPopupId !== latestUnread.id) {
+            sessionStorage.setItem(`opm_last_auto_notice_${currentClassId}`, latestUnread.id);
+            renderNoticeModal(myNotices);
+            document.getElementById('notice-modal').classList.add('on');
             if (navigator.vibrate) {
               try { navigator.vibrate([200, 100, 200, 100, 300]); } catch (e) { }
             }
-
-            document.getElementById('btn-notice-confirm').onclick = () => {
-              document.getElementById('notice-modal').classList.remove('on');
-              localStorage.setItem(`opm_read_notice_${currentClassId}`, notice.id);
-            };
           }
         }
       } catch (e) { }
     }
 
+    // 학생이 상단 종 버튼을 직접 눌렀을 때
+    async function openNoticeModalManually() {
+      if (!currentClassId) return;
+      showToast('작전 지령 확인중...', 800);
+      const allList = await DB.getNoticeList();
+      lastFetchedNotices = allList;
+      const myNotices = allList.filter(n => n.target === 'all' || n.target === currentClassId);
+      renderNoticeModal(myNotices);
+      document.getElementById('notice-modal').classList.add('on');
+      markAllNoticesAsRead(myNotices);
+    }
+    window.openNoticeModalManually = openNoticeModalManually;
+
+    // 지령 모달 내부 렌더링
+    function renderNoticeModal(notices) {
+      const badgeEl = document.getElementById('notice-modal-badge');
+      const contentEl = document.getElementById('notice-modal-content');
+      const timeEl = document.getElementById('notice-modal-time');
+      const histBox = document.getElementById('notice-history-box');
+      const histList = document.getElementById('notice-history-list');
+
+      if (!notices || notices.length === 0) {
+        badgeEl.textContent = 'COMMAND NOTICE';
+        contentEl.textContent = '현재 수신된 새로운 작전 지령이 없습니다.';
+        timeEl.textContent = '';
+        histBox.style.display = 'none';
+        return;
+      }
+
+      // 가장 최신 지령
+      const latest = notices[notices.length - 1];
+      const targetLabel = latest.target === 'all' ? '📢 전체 학급 작전 지령' : `📢 ${currentClassName} 전용 지령`;
+      badgeEl.textContent = targetLabel;
+      contentEl.textContent = latest.text;
+      timeEl.textContent = `발신 시각: ${latest.time || '최근'}`;
+
+      // 이전 지령 히스토리 목록 (최신 1개를 제외한 이전 목록)
+      if (notices.length > 1) {
+        histBox.style.display = 'block';
+        histList.innerHTML = '';
+        const prevList = notices.slice(0, notices.length - 1).reverse();
+        prevList.forEach(n => {
+          const item = document.createElement('div');
+          item.style.cssText = 'background:rgba(0,0,0,0.5);border:1px solid rgba(245,158,11,0.25);border-radius:.45rem;padding:.5rem .65rem;font-size:.75rem;color:#cbd5e1;line-height:1.4';
+          const tLabel = n.target === 'all' ? '[전체]' : `[${currentClassName}]`;
+          item.innerHTML = `<div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--amber);margin-bottom:.2rem;font-weight:700"><span>${tLabel}</span><span>${n.time || ''}</span></div><div>${n.text}</div>`;
+          histList.appendChild(item);
+        });
+      } else {
+        histBox.style.display = 'none';
+      }
+    }
+
+    // 모든 지령 읽음 처리
+    function markAllNoticesAsRead(notices) {
+      if (!currentClassId || !notices || !notices.length) return;
+      const readIds = notices.map(n => n.id);
+      localStorage.setItem(`opm_read_ids_${currentClassId}`, JSON.stringify(readIds));
+      const badgeEl = document.getElementById('notice-badge-cnt');
+      const bellBtn = document.getElementById('btn-notice-bell');
+      if (badgeEl) badgeEl.classList.add('hidden');
+      if (bellBtn) bellBtn.classList.remove('has-unread');
+    }
+
+    function closeNoticeModal() {
+      document.getElementById('notice-modal').classList.remove('on');
+      const myNotices = lastFetchedNotices.filter(n => n.target === 'all' || n.target === currentClassId);
+      markAllNoticesAsRead(myNotices);
+    }
+    window.closeNoticeModal = closeNoticeModal;
+
+    // 관리자 지령 방송 전송 버튼
     document.getElementById('btn-broadcast-send').onclick = async () => {
       const target = document.getElementById('broadcast-target').value;
       const text = document.getElementById('broadcast-text').value.trim();
       if (!text) return showModal('학생들에게 보낼 지령 메시지를 입력해주세요.');
 
       const targetName = target === 'all' ? '전체 학급' : (CLASSES.find(c => c.id === target)?.name || target);
-      showModal(
-        `[${targetName}]에 아래 긴급 작전 지령을 방송하시겠습니까?<br><br>
-         <div style="background:rgba(239,68,68,0.15);border:1px dashed #ef4444;border-radius:.5rem;padding:.75rem;color:#fde68a;font-weight:700;margin:.5rem 0">
-           "${text}"
-         </div>
-         <span style="font-size:.75rem;color:var(--muted)">학생들의 스마트폰 화면에 즉시 팝업으로 표시됩니다.</span>`,
-        true,
-        async ok => {
-          if (!ok) return;
-          showToast('작전 지령 방송 전송중...', 1500);
-          await DB.sendBroadcast(target, text);
-          document.getElementById('broadcast-text').value = '';
-          showModal(`🎉 [${targetName}]에 긴급 작전 지령이 성공적으로 전송되었습니다!`);
-        }
-      );
+      showToast('작전 지령 전송중...', 1500);
+      try {
+        await DB.sendBroadcast(target, text);
+        document.getElementById('broadcast-text').value = '';
+        showModal(`🎉 <b>[${targetName}]</b>에 작전 지령이 성공적으로 방송되었습니다!<br><br><span style="color:var(--amber);font-weight:700">"${text}"</span><br><br><span style="font-size:.75rem;color:var(--muted)">학생들의 스마트폰 상단 알림 종 및 팝업으로 즉시 전달됩니다.</span>`);
+      } catch (err) {
+        showModal('지령 전송 중 오류가 발생했습니다: ' + err.message);
+      }
     };
 
     function toggleScriptInfo() {
