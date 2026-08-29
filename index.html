@@ -1747,7 +1747,7 @@
   </div>
 
   <!-- ── 긴급 작전 지령 팝업 모달 ── -->
-  <div id="notice-modal" class="modal-ov">
+  <div id="notice-modal" class="modal-ov" style="z-index: 120;">
     <div class="hud modal-box" style="border:2px solid #ef4444;box-shadow:0 0 40px rgba(239,68,68,0.5);text-align:center;max-width:380px;background:rgba(15,23,42,0.98)">
       <div style="font-size:2.4rem;color:#ef4444;margin-bottom:.6rem;animation:pulse 1.2s infinite">
         <i class="fa-solid fa-triangle-exclamation"></i>
@@ -2254,7 +2254,7 @@
         return '';
       },
 
-      // ★ 6. 긴급 작전 지령 방송 (실시간 팝업)
+      // ★ 6. 긴급 작전 지령 방송 (실시간 팝업 - 구글 시트 직통 0초 동기화)
       async sendBroadcast(target, text) {
         const noticeObj = {
           id: 'n_' + Date.now(),
@@ -2263,24 +2263,43 @@
           time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
         };
         localStorage.setItem('opm_latest_notice', JSON.stringify(noticeObj));
+
+        // 구글 Apps Script의 작전로그 파이프라인(0초 실시간)을 활용하여 즉시 영구 저장
+        await callGAS('addFeedback', {
+          classId: 'COMMAND_NOTICE',
+          className: '작전지령',
+          writer: 'COMMAND',
+          text: JSON.stringify(noticeObj)
+        });
         callGAS('broadcastNotice', noticeObj);
         return noticeObj;
       },
 
       async getNotice(classId) {
         try {
-          const gasRes = await callGAS('getNotice');
-          if (gasRes && gasRes.success && gasRes.notice) {
-            return gasRes.notice;
+          // 1순위: Apps Script 실시간 직통 조회
+          const res = await callGAS('getFeedbacks', { classId: 'COMMAND_NOTICE', className: '작전지령' });
+          if (res && res.success && res.list && res.list.length > 0) {
+            const lastItem = res.list[res.list.length - 1];
+            if (lastItem && lastItem.text) {
+              const parsed = JSON.parse(lastItem.text);
+              if (parsed && parsed.id && parsed.text) {
+                return parsed;
+              }
+            }
           }
         } catch (e) { }
 
         try {
-          const rows = await loadSheetJSON('설정');
-          for (let i = 0; i < rows.length; i++) {
+          // 2순위: 구글 시트 '작전로그' 탭 직접 조회 (캐시 fallback)
+          const rows = await loadSheetJSON('작전로그');
+          for (let i = rows.length - 1; i >= 0; i--) {
             const r = rows[i].c;
-            if (r && String(r[0]?.v).trim() === '긴급지령' && r[1]?.v) {
-              return JSON.parse(String(r[1].v));
+            if (r && String(r[1]?.v || '') === 'COMMAND' && r[2]?.v) {
+              const parsed = JSON.parse(String(r[2].v));
+              if (parsed && parsed.id && parsed.text) {
+                return parsed;
+              }
             }
           }
         } catch (e) { }
