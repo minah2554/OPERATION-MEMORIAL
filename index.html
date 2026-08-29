@@ -245,47 +245,68 @@
     }
 
     .badge {
-      display: inline-block;
-      font-size: .65rem;
-      font-weight: 700;
-      letter-spacing: .05em;
-      color: var(--green);
-      border: 1px solid rgba(16, 185, 129, .4);
-      background: rgba(16, 185, 129, .08);
-      padding: .3rem .85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      font-size: .75rem;
+      font-weight: 800;
+      letter-spacing: .08em;
+      color: #6ee7b7;
+      border: 1.5px solid rgba(16, 185, 129, .6);
+      background: rgba(16, 185, 129, .15);
+      padding: .35rem .85rem;
       border-radius: 999px;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.35), 0 2px 8px rgba(0, 0, 0, 0.7);
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+      transition: all .2s ease;
+      cursor: pointer;
+    }
+
+    .badge:hover {
+      transform: translateY(-1px) scale(1.03);
+      box-shadow: 0 0 22px rgba(16, 185, 129, 0.65), 0 4px 12px rgba(0, 0, 0, 0.8);
+      background: rgba(16, 185, 129, .25);
     }
 
     .op-title {
-      font-size: 1.9rem;
+      font-size: clamp(1.8rem, 6.5vw, 2.5rem);
       font-weight: 900;
-      line-height: 1.2;
-      margin: 1rem 0 .3rem;
+      line-height: 1.25;
+      margin: 1.1rem 0 .35rem;
+      color: #ffffff;
+      text-shadow: 0 3px 18px rgba(0, 0, 0, 0.98), 0 0 28px rgba(245, 158, 11, 0.45);
+      letter-spacing: .06em;
     }
 
     .op-title span {
       color: var(--amber);
+      text-shadow: 0 3px 20px rgba(0, 0, 0, 0.98), 0 0 32px rgba(245, 158, 11, 0.85);
     }
 
     .op-sub {
-      font-size: .8rem;
-      color: var(--muted);
-      font-weight: 500;
+      font-size: clamp(0.78rem, 3.2vw, 0.92rem);
+      color: #e2e8f0;
+      font-weight: 600;
+      letter-spacing: .02em;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95), 0 1px 3px rgba(0, 0, 0, 0.9);
     }
 
     .info-card {
       border-radius: .85rem;
       padding: 1.15rem;
       margin-top: .85rem;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.55), inset 0 0 15px rgba(255, 255, 255, 0.02);
     }
 
     .info-card-title {
-      font-size: .9rem;
-      font-weight: 700;
+      font-size: .92rem;
+      font-weight: 800;
       margin-bottom: .6rem;
       display: flex;
       align-items: center;
       gap: .45rem;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+      letter-spacing: .02em;
     }
 
     .info-card ul {
@@ -297,9 +318,10 @@
 
     .info-card li,
     .info-card p {
-      font-size: .8rem;
+      font-size: .82rem;
       color: #cbd5e1;
       line-height: 1.65;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
     }
 
     .btn-primary {
@@ -312,13 +334,15 @@
       border-radius: .85rem;
       border: none;
       cursor: pointer;
-      box-shadow: 0 0 18px rgba(245, 158, 11, .35);
-      transition: background .2s, transform .1s;
+      box-shadow: 0 0 20px rgba(245, 158, 11, .4);
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+      transition: background .2s, transform .1s, box-shadow .2s;
       font-family: inherit;
     }
 
     .btn-primary:hover {
       background: var(--amber2);
+      box-shadow: 0 0 28px rgba(245, 158, 11, .6);
     }
 
     .btn-primary:active {
@@ -383,10 +407,25 @@
     }
 
     @keyframes bellRing {
-      0%, 100% { transform: rotate(0); }
-      10%, 30% { transform: rotate(14deg); }
-      20%, 40% { transform: rotate(-14deg); }
-      50% { transform: rotate(0); }
+
+      0%,
+      100% {
+        transform: rotate(0);
+      }
+
+      10%,
+      30% {
+        transform: rotate(14deg);
+      }
+
+      20%,
+      40% {
+        transform: rotate(-14deg);
+      }
+
+      50% {
+        transform: rotate(0);
+      }
     }
 
     .notice-badge-cnt {
@@ -577,20 +616,22 @@
     }
 
     #st-theme-title {
-      font-size: 1.15rem;
+      font-size: 1.2rem;
       font-weight: 900;
       color: #fff;
-      line-height: 1.3;
-      margin-bottom: .4rem;
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+      line-height: 1.35;
+      margin-bottom: .45rem;
+      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95), 0 0 20px rgba(245, 158, 11, 0.5);
       word-break: keep-all;
+      letter-spacing: .02em;
     }
 
     #st-theme-desc {
-      font-size: .78rem;
-      color: #cbd5e1;
+      font-size: .8rem;
+      color: #e2e8f0;
       line-height: 1.55;
       word-break: keep-all;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
     }
 
     .st-free-guide {
@@ -734,26 +775,30 @@
     }
 
     .bc-label {
-      font-size: .6rem;
-      font-weight: 700;
-      color: #cbd5e1;
+      font-size: .62rem;
+      font-weight: 800;
+      color: #f1f5f9;
       line-height: 1.3;
       word-break: keep-all;
       overflow: hidden;
       display: -webkit-box;
       -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95), 0 0 2px rgba(0, 0, 0, 1);
     }
 
     .bc.done .bc-label {
-      color: #fff;
-      font-size: .58rem;
+      color: #ffffff;
+      font-size: .6rem;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 1), 0 0 10px rgba(16, 185, 129, 0.7);
     }
 
     .bc-sub {
       font-size: .52rem;
-      color: var(--muted);
+      color: #cbd5e1;
       margin-top: .15rem;
+      font-weight: 700;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
     }
 
     /* 미션 로그 */
@@ -1531,7 +1576,7 @@
     <!-- 브리핑 -->
     <div id="briefing-section">
       <div class="wrap" style="text-align:center">
-        <span class="badge"><i class="fa-solid fa-shield-halved" style="margin-right:.3rem"></i>SECURE PROTOCOL
+        <span class="badge" onclick="openAdminLogin()" title="관리자 모드 접속"><i class="fa-solid fa-shield-halved" style="margin-right:.3rem"></i>SECURE PROTOCOL
           ACTIVE</span>
         <h1 class="op-title">OPERATION : <span>MEMORIAL</span></h1>
         <p class="op-sub">작전명 : 메모리얼 · 전쟁기념관 현장체험학습 미션</p>
@@ -1555,12 +1600,6 @@
         <button id="btn-show-login" class="btn-primary" style="margin-top:1.25rem">
           <i class="fa-solid fa-right-to-bracket" style="margin-right:.4rem"></i>작전 구역 진입
         </button>
-
-        <div style="margin-top:1rem">
-          <button onclick="openAdminLogin()" class="btn-ghost">
-            <i class="fa-solid fa-terminal" style="margin-right:.3rem"></i>교사 · 관리자 접속
-          </button>
-        </div>
       </div>
     </div>
 
@@ -1574,7 +1613,8 @@
         </button>
         <div style="display:flex;align-items:center;gap:.45rem">
           <!-- ★ 작전 지령 알림 종 (숫자 배지) -->
-          <button id="btn-notice-bell" class="btn-ghost notice-bell-btn" onclick="openNoticeModalManually()" title="작전 지령 알림">
+          <button id="btn-notice-bell" class="btn-ghost notice-bell-btn" onclick="openNoticeModalManually()"
+            title="작전 지령 알림">
             <i class="fa-solid fa-bell"></i>
             <span id="notice-badge-cnt" class="notice-badge-cnt hidden">0</span>
           </button>
@@ -1671,8 +1711,10 @@
       </div>
 
       <!-- ★ 관리자 긴급 지령 / 전체 공지 방송 패널 -->
-      <div class="hud" style="border-radius:.85rem;padding:1rem 1.25rem;margin-bottom:.85rem;border-left:3.5px solid #ef4444;background:linear-gradient(135deg, rgba(239,68,68,0.1) 0%, rgba(15,23,42,0.96) 100%)">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem;flex-wrap:wrap;gap:.4rem">
+      <div class="hud"
+        style="border-radius:.85rem;padding:1rem 1.25rem;margin-bottom:.85rem;border-left:3.5px solid #ef4444;background:linear-gradient(135deg, rgba(239,68,68,0.1) 0%, rgba(15,23,42,0.96) 100%)">
+        <div
+          style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem;flex-wrap:wrap;gap:.4rem">
           <div style="font-size:.88rem;font-weight:900;color:#fca5a5;display:flex;align-items:center;gap:.45rem">
             <i class="fa-solid fa-bullhorn" style="animation:pulse 1.5s infinite"></i> COMMAND BROADCAST (작전 지령 방송)
           </div>
@@ -1686,10 +1728,28 @@
             <option value="class3">3반 전용</option>
             <option value="class4">4반 전용</option>
           </select>
-          <input type="text" id="broadcast-text" class="field" placeholder="학생들에게 보낼 긴급 지령 메시지를 입력하세요 (예: 11시 40분까지 1층 로비 집합!)" style="flex:1;min-width:200px">
-          <button id="btn-broadcast-send" class="btn-primary" style="width:auto;padding:.65rem 1.25rem;font-size:.85rem;white-space:nowrap;background:#ef4444;color:#fff;box-shadow:0 0 12px rgba(239,68,68,0.4)">
+          <input type="text" id="broadcast-text" class="field"
+            placeholder="학생들에게 보낼 긴급 지령 메시지를 입력하세요 (예: 11시 40분까지 1층 로비 집합!)" style="flex:1;min-width:200px">
+          <button id="btn-broadcast-send" class="btn-primary"
+            style="width:auto;padding:.65rem 1.25rem;font-size:.85rem;white-space:nowrap;background:#ef4444;color:#fff;box-shadow:0 0 12px rgba(239,68,68,0.4)">
             <i class="fa-solid fa-paper-plane" style="margin-right:.3rem"></i>지령 전송
           </button>
+        </div>
+      </div>
+
+      <!-- ★ 발송된 작전 지령 히스토리 목록 패널 (관리자용) -->
+      <div class="hud" style="border-radius:.85rem;padding:1rem 1.25rem;margin-bottom:.85rem;background:rgba(15,23,42,0.92);border:1px solid var(--border2)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem;flex-wrap:wrap;gap:.4rem">
+          <div style="font-size:.82rem;font-weight:800;color:var(--text);display:flex;align-items:center;gap:.4rem">
+            <i class="fa-solid fa-clock-rotate-left tg"></i> 발송된 작전 지령 히스토리
+            <span id="admin-notice-cnt" style="font-size:.68rem;color:var(--amber);background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);padding:.15rem .45rem;border-radius:.3rem;font-weight:700">0건</span>
+          </div>
+          <button class="btn-ghost btn-danger" onclick="clearNoticesConfirm()" style="padding:.35rem .75rem;font-size:.72rem">
+            <i class="fa-solid fa-trash-can" style="margin-right:.3rem"></i>지령 내역 전체 초기화
+          </button>
+        </div>
+        <div id="admin-notice-history-list" style="max-height:160px;overflow-y:auto;display:flex;flex-direction:column;gap:.45rem">
+          <div style="font-size:.75rem;color:var(--muted);text-align:center;padding:.8rem 0">발송된 작전 지령이 없습니다.</div>
         </div>
       </div>
 
@@ -1807,34 +1867,47 @@
 
   <!-- ── 긴급 작전 지령 팝업 모달 ── -->
   <div id="notice-modal" class="modal-ov" style="z-index: 120;" onclick="if(event.target===this)closeNoticeModal()">
-    <div class="hud modal-box" style="border:2px solid #ef4444;box-shadow:0 0 40px rgba(239,68,68,0.5);text-align:center;max-width:390px;background:rgba(15,23,42,0.98);padding:1.6rem 1.3rem;position:relative">
-      <button onclick="closeNoticeModal()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer"><i class="fa-solid fa-xmark"></i></button>
+    <div class="hud modal-box"
+      style="border:2px solid #ef4444;box-shadow:0 0 45px rgba(239,68,68,0.55);text-align:center;max-width:390px;background:rgba(15,23,42,0.98);padding:1.6rem 1.3rem;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+      <button onclick="closeNoticeModal()"
+        style="position:absolute;top:1rem;right:1rem;background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer"><i
+          class="fa-solid fa-xmark"></i></button>
 
       <!-- ★ 주의 아이콘 완벽 가운데 정렬 -->
-      <div style="display:flex;justify-content:center;align-items:center;width:100%;font-size:2.4rem;color:#ef4444;margin-bottom:.5rem;animation:pulse 1.2s infinite">
+      <div
+        style="display:flex;justify-content:center;align-items:center;width:100%;font-size:2.4rem;color:#ef4444;margin-bottom:.5rem;animation:pulse 1.2s infinite">
         <i class="fa-solid fa-triangle-exclamation"></i>
       </div>
 
-      <div style="display:inline-flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;letter-spacing:.08em;color:#fca5a5;background:rgba(239,68,68,0.18);border:1px solid rgba(239,68,68,0.5);padding:.25rem .75rem;border-radius:999px;margin-bottom:.5rem" id="notice-modal-badge">
+      <div
+        style="display:inline-flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;letter-spacing:.08em;color:#fca5a5;background:rgba(239,68,68,0.18);border:1px solid rgba(239,68,68,0.5);padding:.25rem .75rem;border-radius:999px;margin-bottom:.5rem"
+        id="notice-modal-badge">
         COMMAND NOTICE
       </div>
-      <h3 style="font-size:1.15rem;font-weight:900;color:#fff;margin-bottom:.75rem;letter-spacing:.04em">🚨 긴급 작전 본부 지령</h3>
+      <h3 style="font-size:1.15rem;font-weight:900;color:#fff;margin-bottom:.75rem;letter-spacing:.04em">🚨 긴급 작전 본부 지령
+      </h3>
 
       <!-- 최신 지령 카드 -->
-      <div id="notice-modal-content" style="font-size:.92rem;font-weight:700;color:#fde68a;line-height:1.6;background:rgba(0,0,0,0.4);border-radius:.6rem;padding:.85rem .95rem;margin-bottom:.4rem;word-break:keep-all;border:1px dashed rgba(245,158,11,0.4);text-align:center">
+      <div id="notice-modal-content"
+        style="font-size:.92rem;font-weight:700;color:#fde68a;line-height:1.6;background:rgba(0,0,0,0.4);border-radius:.6rem;padding:.85rem .95rem;margin-bottom:.4rem;word-break:keep-all;border:1px dashed rgba(245,158,11,0.4);text-align:center">
         수신된 작전 지령이 없습니다.
       </div>
-      <div style="font-size:.65rem;color:var(--muted);margin-bottom:.85rem;text-align:center" id="notice-modal-time"></div>
+      <div style="font-size:.65rem;color:var(--muted);margin-bottom:.85rem;text-align:center" id="notice-modal-time">
+      </div>
 
       <!-- 이전 지령 목록 (히스토리) -->
       <div id="notice-history-box" style="margin-bottom:1rem;display:none;text-align:left">
-        <div style="font-size:.72rem;font-weight:700;color:#94a3b8;margin-bottom:.4rem;display:flex;align-items:center;gap:.35rem">
+        <div
+          style="font-size:.72rem;font-weight:700;color:#94a3b8;margin-bottom:.4rem;display:flex;align-items:center;gap:.35rem">
           <i class="fa-solid fa-clock-rotate-left"></i> 지난 지령 기록
         </div>
-        <div id="notice-history-list" style="max-height:120px;overflow-y:auto;display:flex;flex-direction:column;gap:.35rem"></div>
+        <div id="notice-history-list"
+          style="max-height:120px;overflow-y:auto;display:flex;flex-direction:column;gap:.35rem"></div>
       </div>
 
-      <button id="btn-notice-confirm" class="btn-primary" style="background:#ef4444;color:#fff;box-shadow:0 0 15px rgba(239,68,68,0.4);width:100%;font-size:.9rem;padding:.85rem" onclick="closeNoticeModal()">
+      <button id="btn-notice-confirm" class="btn-primary"
+        style="background:#ef4444;color:#fff;box-shadow:0 0 15px rgba(239,68,68,0.4);width:100%;font-size:.9rem;padding:.85rem"
+        onclick="closeNoticeModal()">
         <i class="fa-solid fa-check" style="margin-right:.4rem"></i>지령 확인 완료
       </button>
     </div>
@@ -2334,7 +2407,8 @@
           id: 'n_' + Date.now(),
           target: target,
           text: text,
-          time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
+          time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+          timestamp: Date.now()
         };
         localStorage.setItem('opm_latest_notice', JSON.stringify(noticeObj));
 
@@ -2350,46 +2424,80 @@
       },
 
       async getNoticeList() {
+        let clearedTime = parseInt(localStorage.getItem('opm_notice_cleared_at') || '0', 10);
+        let rawList = [];
+
         try {
           // 1순위: Apps Script 실시간 직통 조회
           const res = await callGAS('getFeedbacks', { classId: 'COMMAND_NOTICE', className: '작전지령' });
           if (res && res.success && res.list && res.list.length > 0) {
-            const list = [];
-            for (const item of res.list) {
-              try {
-                const parsed = JSON.parse(item.text);
-                if (parsed && parsed.id && parsed.text) {
-                  list.push(parsed);
-                }
-              } catch (e) { }
-            }
-            if (list.length) return list;
+            rawList = res.list;
           }
         } catch (e) { }
 
-        try {
-          // 2순위: 구글 시트 '작전로그' 탭 직접 조회 (캐시 fallback)
-          const rows = await loadSheetJSON('작전로그');
-          const list = [];
-          for (let i = 0; i < rows.length; i++) {
-            const r = rows[i].c;
-            if (r && String(r[1]?.v || '') === 'COMMAND' && r[2]?.v) {
-              try {
-                const parsed = JSON.parse(String(r[2].v));
-                if (parsed && parsed.id && parsed.text) {
+        if (!rawList.length) {
+          try {
+            // 2순위: 구글 시트 '작전로그' 탭 직접 조회 (캐시 fallback)
+            const rows = await loadSheetJSON('작전로그');
+            for (let i = 0; i < rows.length; i++) {
+              const r = rows[i].c;
+              const writer = String(r?.[1]?.v || '');
+              if ((writer === 'COMMAND' || writer === 'COMMAND_CLEAR') && r?.[2]?.v) {
+                rawList.push({ writer: writer, text: String(r[2].v) });
+              }
+            }
+          } catch (e) { }
+        }
+
+        const list = [];
+        if (rawList.length > 0) {
+          for (const item of rawList) {
+            try {
+              const parsed = JSON.parse(item.text);
+              if (item.writer === 'COMMAND_CLEAR' || parsed.action === 'clear') {
+                const cTime = parsed.timestamp || 0;
+                if (cTime > clearedTime) clearedTime = cTime;
+              }
+            } catch (e) { }
+          }
+
+          for (const item of rawList) {
+            try {
+              const parsed = JSON.parse(item.text);
+              if (parsed && parsed.id && parsed.text && !parsed.action) {
+                const nTime = parsed.timestamp || 0;
+                if (nTime >= clearedTime) {
                   list.push(parsed);
                 }
-              } catch (e) { }
-            }
+              }
+            } catch (e) { }
           }
           if (list.length) return list;
-        } catch (e) { }
+        }
 
         try {
           const localNotice = localStorage.getItem('opm_latest_notice');
-          if (localNotice) return [JSON.parse(localNotice)];
+          if (localNotice) {
+            const parsed = JSON.parse(localNotice);
+            const nTime = parsed.timestamp || 0;
+            if (nTime >= clearedTime) return [parsed];
+          }
         } catch (e) { }
         return [];
+      },
+
+      async clearAllNotices() {
+        const clearObj = { action: 'clear', timestamp: Date.now() };
+        localStorage.removeItem('opm_latest_notice');
+        localStorage.setItem('opm_notice_cleared_at', String(Date.now()));
+        try {
+          await callGAS('addFeedback', {
+            classId: 'COMMAND_NOTICE',
+            className: '작전지령',
+            writer: 'COMMAND_CLEAR',
+            text: JSON.stringify(clearObj)
+          });
+        } catch (e) { }
       },
 
       async resetAll() {
@@ -3103,6 +3211,7 @@
     async function initAdmin() {
       buildAdminTabs();
       await refreshAdmin();
+      await renderAdminNoticeHistory();
     }
 
     function buildAdminTabs() {
@@ -3240,6 +3349,7 @@
           </div>`;
         cont.appendChild(card);
       });
+      await renderAdminNoticeHistory();
     }
     window.refreshAdmin = refreshAdmin;
 
@@ -3357,14 +3467,18 @@
         const readIds = JSON.parse(localStorage.getItem(`opm_read_ids_${currentClassId}`) || '[]');
         const unreadList = myNotices.filter(n => !readIds.includes(n.id));
 
-        // 1. 상단 알림 종(Bell) 배지 갱신
+        // 1. 상단 알림 종(Bell) 배지 갱신 (관리자가 초기화하기 전까지 누적 개수 항상 표시)
         const badgeEl = document.getElementById('notice-badge-cnt');
         const bellBtn = document.getElementById('btn-notice-bell');
         if (badgeEl && bellBtn) {
-          if (unreadList.length > 0) {
-            badgeEl.textContent = unreadList.length;
+          if (myNotices.length > 0) {
+            badgeEl.textContent = myNotices.length;
             badgeEl.classList.remove('hidden');
-            bellBtn.classList.add('has-unread');
+            if (unreadList.length > 0) {
+              bellBtn.classList.add('has-unread');
+            } else {
+              bellBtn.classList.remove('has-unread');
+            }
           } else {
             badgeEl.classList.add('hidden');
             bellBtn.classList.remove('has-unread');
@@ -3440,14 +3554,12 @@
       }
     }
 
-    // 모든 지령 읽음 처리
+    // 모든 지령 읽음 처리 (종 흔들림만 해제하고 배지 누적 숫자는 유지)
     function markAllNoticesAsRead(notices) {
       if (!currentClassId || !notices || !notices.length) return;
       const readIds = notices.map(n => n.id);
       localStorage.setItem(`opm_read_ids_${currentClassId}`, JSON.stringify(readIds));
-      const badgeEl = document.getElementById('notice-badge-cnt');
       const bellBtn = document.getElementById('btn-notice-bell');
-      if (badgeEl) badgeEl.classList.add('hidden');
       if (bellBtn) bellBtn.classList.remove('has-unread');
     }
 
@@ -3457,6 +3569,49 @@
       markAllNoticesAsRead(myNotices);
     }
     window.closeNoticeModal = closeNoticeModal;
+
+    // ★ 관리자 지령 히스토리 렌더링 함수
+    async function renderAdminNoticeHistory() {
+      const listEl = document.getElementById('admin-notice-history-list');
+      const cntEl = document.getElementById('admin-notice-cnt');
+      if (!listEl) return;
+      try {
+        const notices = await DB.getNoticeList();
+        if (cntEl) cntEl.textContent = `${notices.length}건`;
+        if (!notices || notices.length === 0) {
+          listEl.innerHTML = '<div style="font-size:.75rem;color:var(--muted);text-align:center;padding:.8rem 0">발송된 작전 지령이 없습니다.</div>';
+          return;
+        }
+        listEl.innerHTML = '';
+        const reversed = [...notices].reverse();
+        reversed.forEach(n => {
+          const item = document.createElement('div');
+          item.style.cssText = 'background:rgba(7,10,19,0.85);border:1px solid rgba(239,68,68,0.3);border-radius:.55rem;padding:.6rem .85rem;font-size:.8rem;color:#f1f5f9;line-height:1.45';
+          const targetName = n.target === 'all' ? '📢 전체 학급' : (CLASSES.find(c => c.id === n.target)?.name || n.target);
+          item.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.3rem;font-size:.68rem">
+              <span style="color:var(--amber);font-weight:800;background:rgba(245,158,11,0.12);padding:.1rem .4rem;border-radius:.25rem">${targetName}</span>
+              <span style="color:var(--muted);font-weight:600">${n.time || ''}</span>
+            </div>
+            <div style="color:#fde68a;font-weight:700;word-break:break-all">${n.text}</div>
+          `;
+          listEl.appendChild(item);
+        });
+      } catch (e) { }
+    }
+    window.renderAdminNoticeHistory = renderAdminNoticeHistory;
+
+    // ★ 관리자 지령 내역 전체 초기화
+    async function clearNoticesConfirm() {
+      showModal('발송된 모든 작전 지령 내역을 초기화하시겠습니까?<br><br><span style="font-size:.75rem;color:var(--muted)">학생들의 스마트폰 알림 종 및 지령 팝업도 함께 초기화됩니다.</span>', true, async ok => {
+        if (!ok) return;
+        showToast('작전 지령 초기화중...', 1000);
+        await DB.clearAllNotices();
+        await renderAdminNoticeHistory();
+        showModal('작전 지령 내역이 성공적으로 초기화되었습니다.');
+      });
+    }
+    window.clearNoticesConfirm = clearNoticesConfirm;
 
     // 관리자 지령 방송 전송 버튼
     document.getElementById('btn-broadcast-send').onclick = async () => {
@@ -3469,6 +3624,7 @@
       try {
         await DB.sendBroadcast(target, text);
         document.getElementById('broadcast-text').value = '';
+        await renderAdminNoticeHistory();
         showModal(`🎉 <b>[${targetName}]</b>에 작전 지령이 성공적으로 방송되었습니다!<br><br><span style="color:var(--amber);font-weight:700">"${text}"</span><br><br><span style="font-size:.75rem;color:var(--muted)">학생들의 스마트폰 상단 알림 종 및 팝업으로 즉시 전달됩니다.</span>`);
       } catch (err) {
         showModal('지령 전송 중 오류가 발생했습니다: ' + err.message);
