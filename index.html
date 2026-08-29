@@ -1911,14 +1911,29 @@
     }
 
     function rebuildClassSelect() {
+      // 1. 학생 로그인 반 선택 드롭다운 동적 생성
       const sel = document.getElementById('login-class-select');
-      sel.innerHTML = '';
-      CLASSES.forEach(c => {
-        const o = document.createElement('option');
-        o.value = c.id;
-        o.textContent = c.name;
-        sel.appendChild(o);
-      });
+      if (sel) {
+        sel.innerHTML = '';
+        CLASSES.forEach(c => {
+          const o = document.createElement('option');
+          o.value = c.id;
+          o.textContent = c.name;
+          sel.appendChild(o);
+        });
+      }
+
+      // 2. 관리자 작전 지령 방송 대상 드롭다운 동적 생성 (구글시트 추가 반 자동 반영)
+      const bSel = document.getElementById('broadcast-target');
+      if (bSel) {
+        bSel.innerHTML = '<option value="all">📢 전체 학급</option>';
+        CLASSES.forEach(c => {
+          const o = document.createElement('option');
+          o.value = c.id;
+          o.textContent = `${c.name} 전용`;
+          bSel.appendChild(o);
+        });
+      }
     }
 
     /* ═══════════════════════════════════════════════════════════
