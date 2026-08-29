@@ -1747,7 +1747,7 @@
     /* ═══════════════════════════════════════════════════════════
        ★ CONFIG — 설정 영역
        ═══════════════════════════════════════════════════════════ */
-    const DATA_VERSION = 'v20260829_r1';
+    const DATA_VERSION = 'v20260829_r2';
     const SHEET_ID = '1nWCYrJuGPscu5LmVX7nCfmXTgaOEI9ahJmXb2v4TKSg';
     const DRIVE_FOLDER_ID = '1Ixoi6vlBTXfHvm6OKNILbVSu6G9MmbAQ';
 
@@ -1890,6 +1890,11 @@
       const str = String(rawUrlOrId).trim();
       if (!str) return '';
 
+      // base64 데이터 URI나 blob URL인 경우 원본 그대로 반환 (미리보기 및 썸네일 즉시 렌더링)
+      if (str.startsWith('data:image/') || str.startsWith('blob:')) {
+        return str;
+      }
+
       // 이미 완전한 http URL인 경우
       if (str.startsWith('http://') || str.startsWith('https://')) {
         // 이미 lh3나 thumbnail URL 형태이면 그대로 사용
@@ -1910,7 +1915,10 @@
       }
 
       // 순수 파일 ID 문자열인 경우
-      return `https://drive.google.com/thumbnail?id=${str}&sz=w800`;
+      if (/^[a-zA-Z0-9_-]{10,}$/.test(str)) {
+        return `https://drive.google.com/thumbnail?id=${str}&sz=w800`;
+      }
+      return str;
     }
 
     // 구글 시트 저장용 cells 정제 (드라이브 URL 및 경량화된 실시간 썸네일 데이터 보존)
@@ -2455,8 +2463,8 @@
 
       if (pollingTimer) clearInterval(pollingTimer);
       pollingTimer = setInterval(async () => {
-        // 사진 업로드 중이거나 활성 학급이 없으면 폴링 일시 건너뜀 (덮어쓰기 방지)
-        if (!currentClassId || isUploadingPhoto) return;
+        // 사진 업로드 중이거나, 백그라운드(화면 꺼짐) 상태면 트래픽 절약을 위해 일시 건너뜀 (100명 동시접속 최적화)
+        if (!currentClassId || isUploadingPhoto || document.hidden) return;
 
         try {
           const freshData = await DB.getClass(currentClassId);
@@ -2464,23 +2472,23 @@
             const freshJson = JSON.stringify({
               themeName: freshData.themeName,
               teacherNum: freshData.teacherNum,
-              cells: freshData.cells.map(c => ({ id: c.id, completed: c.completed, imgUrl: c.imgUrl, title: c.title }))
+              cells: freshData.cells.map(c => ({ id: c.id, completed: c.completed, imgUrl: c.imgUrl, title: c.title, isPassed: c.isPassed }))
             });
             if (freshJson !== lastRenderedStateJson && !isUploadingPhoto) {
               renderGrid(freshData);
             }
           }
         } catch (e) { }
-      }, 1500);
+      }, 2500);
 
       if (fbPollingTimer) clearInterval(fbPollingTimer);
       fbPollingTimer = setInterval(async () => {
-        if (!currentClassId || isUploadingPhoto) return;
+        if (!currentClassId || isUploadingPhoto || document.hidden) return;
         try {
           const freshFbs = await DB.getFeedbacks(currentClassId, currentClassName);
           renderFeedbackList(freshFbs);
         } catch (e) { }
-      }, 3000);
+      }, 4000);
     }
 
     /* ═══════════════════════════════════════════════════════════
@@ -2664,12 +2672,23 @@
     async function handleCellClick(cell, data) {
       const cellIdx = Number(cell.id);
 
-      if (cell.completed && cell.imgUrl) {
+      if (cell.completed) {
         selectedCellIdx = cellIdx;
-        const missionLabel = (cell.isTeacher && data.teacherNum) ? `선생님+${data.teacherNum}번 접선 인증` : `${cell.title} 인증 사진`;
+        const cachedImg = localStorage.getItem(`opm_img_${currentClassId}_${cellIdx}`);
+        let imgSrc = cell.imgUrl || cachedImg || '';
+        if (imgSrc) {
+          imgSrc = formatDriveThumbnailUrl(imgSrc);
+        } else {
+          imgSrc = 'https://images.unsplash.com/photo-1590496793929-36417d3117de?auto=format&fit=crop&w=800&q=80';
+        }
+
+        const missionLabel = (cell.isTeacher && data.teacherNum) ? `선생님+${data.teacherNum}번 접선 인증` : (cell.isSpecial ? `${cell.title} 인증 사진` : `자유 탐색 ${cell.freeNum || (cellIdx + 1)} 인증 사진`);
         document.getElementById('preview-title').textContent = missionLabel;
         const previewImg = document.getElementById('preview-img');
-        previewImg.src = formatDriveThumbnailUrl(cell.imgUrl);
+        previewImg.onerror = function () {
+          this.src = 'https://images.unsplash.com/photo-1590496793929-36417d3117de?auto=format&fit=crop&w=800&q=80';
+        };
+        previewImg.src = imgSrc;
         document.getElementById('photo-modal').classList.add('on');
         return;
       }
@@ -2936,15 +2955,25 @@
       const miniStat = document.getElementById(`mini-stat-${clsId}`);
       if (miniGrid && data?.cells) {
         let comp = 0;
+        let studentComp = 0;
+        let passComp = 0;
         miniGrid.innerHTML = '';
         data.cells.forEach(c => {
-          if (c.completed) comp++;
+          if (c.completed) {
+            comp++;
+            if (c.isPassed) passComp++;
+            else studentComp++;
+          }
           const mc = document.createElement('div');
 
           if (c.completed) {
-            // ★ 완료된 미션: 굵은 X 표시로 확실하게 시각화
+            // ★ 완료된 미션: 굵은 X 표시 (패스된 것은 주황색, 학생 인증은 초록/빨강)
             mc.className = 'mini-cell done-cell';
-            mc.innerHTML = `<span style="font-size:1.15rem;font-weight:900;color:var(--red);text-shadow:0 0 6px rgba(239,68,68,0.7)">✖</span>`;
+            if (c.isPassed) {
+              mc.innerHTML = `<span style="font-size:1.05rem;font-weight:900;color:var(--amber);text-shadow:0 0 6px rgba(245,158,11,0.7)">PASS</span>`;
+            } else {
+              mc.innerHTML = `<span style="font-size:1.15rem;font-weight:900;color:var(--red);text-shadow:0 0 6px rgba(239,68,68,0.7)">✖</span>`;
+            }
           } else if (c.isSpecial) {
             // ★ 미완료된 특별 미션: 미션 내용을 직접 보여줌
             mc.className = 'mini-cell special-cell';
@@ -2957,7 +2986,7 @@
           }
           miniGrid.appendChild(mc);
         });
-        miniStat.textContent = `${comp}/16 완료`;
+        miniStat.innerHTML = `<b>${comp}/16 완료</b> <span style="color:var(--green)">(학생인증: ${studentComp})</span> <span style="color:var(--amber)">(패스: ${passComp})</span>`;
       }
       const fbList = document.getElementById(`cls-fb-list-${clsId}`);
       const fbCnt = document.getElementById(`cls-fb-cnt-${clsId}`);
@@ -2985,7 +3014,10 @@
 
       const sorted = CLASSES.map(c => all.find(a => a.id === c.id) || { id: c.id, name: c.name, cells: [] });
       sorted.forEach(d => {
-        const comp = (d.cells || []).filter(c => c.completed).length;
+        const completedCells = (d.cells || []).filter(c => c.completed);
+        const comp = completedCells.length;
+        const passComp = completedCells.filter(c => c.isPassed).length;
+        const studentComp = comp - passComp;
         const pct = Math.round((comp / 16) * 100) || 0;
         const card = document.createElement('div');
         card.className = 'hud adm-card';
@@ -2995,10 +3027,14 @@
             <span class="adm-card-cnt">${comp}/16 (${pct}%)</span>
           </div>
           <div class="adm-card-theme">테마: ${d.themeName || '미지정'}</div>
+          <div style="font-size:.68rem;color:#94a3b8;margin-bottom:.45rem;display:flex;gap:.5rem">
+            <span>학생 인증: <b style="color:var(--green)">${studentComp}</b></span>
+            <span>관리자 패스: <b style="color:var(--amber)">${passComp}</b></span>
+          </div>
           <div class="adm-prog-bg"><div class="adm-prog-fill" style="width:${pct}%"></div></div>
           <div class="adm-card-btns">
             <button class="btn-sm btn-monitor" onclick="monitorBoard('${d.id}','${d.name || d.id}')"><i class="fa-solid fa-eye" style="margin-right:.3rem"></i>보드 감시</button>
-            <button class="btn-sm btn-pass"    onclick="passCell('${d.id}')"><i class="fa-solid fa-plus" style="margin-right:.2rem"></i>패스</button>
+            <button class="btn-sm btn-pass"    onclick="passCell('${d.id}')"><i class="fa-solid fa-plus" style="margin-right:.2rem"></i>자유패스</button>
             <button class="btn-sm btn-fb"      onclick="showFbModal('${d.id}','${d.name || d.id}')"><i class="fa-solid fa-comments" style="margin-right:.2rem"></i>소감</button>
           </div>`;
         cont.appendChild(card);
@@ -3073,16 +3109,27 @@
     window.showFbModal = showFbModal;
     window.closeFbModal = closeFbModal;
 
+    // ★ 관리자 자유 탐색 미션만 패스 (특별 미션 보호 & 패스 카운트 분리)
     async function passCell(id) {
       const data = await DB.getClass(id);
       if (!data?.cells?.length) return showModal('해당 학급의 빙고판이 아직 생성되지 않았습니다.');
       const cells = [...data.cells];
-      const target = cells.find(c => !c.completed);
-      if (!target) return showModal('모든 미션이 이미 완료된 학급입니다.');
-      showModal(`[${data.name || id}] 학급의\n"${target.title}" 미션을 강제 승인하시겠습니까?`, true, async ok => {
+
+      // 미완료된 '자유 탐색' 미션만 검색 (특별 미션은 패스 제외)
+      const target = cells.find(c => !c.completed && !c.isSpecial);
+      if (!target) {
+        const hasUncompletedSpecial = cells.some(c => !c.completed && c.isSpecial);
+        if (hasUncompletedSpecial) {
+          return showModal('남은 미완료 미션은 모두 <b>특별 미션</b>(선생님 접선 등)입니다.<br><span style="color:var(--amber);font-size:.8rem">특별 미션은 학생들이 직접 인증해야 합니다.</span>');
+        }
+        return showModal('모든 미션이 이미 완료된 학급입니다.');
+      }
+
+      showModal(`[${data.name || id}] 학급의\n"${target.title}" (자유탐색) 미션을\n관리자 권한으로 강제 패스하시겠습니까?`, true, async ok => {
         if (!ok) return;
-        showToast('패스 처리중...', 1500);
+        showToast('자유 미션 패스 처리중...', 1500);
         target.completed = true;
+        target.isPassed = true; // 관리자 패스 플래그
         target.imgUrl = 'https://images.unsplash.com/photo-1590496793929-36417d3117de?auto=format&fit=crop&w=400&q=80';
         await DB.updClass(id, { cells });
         await refreshAdmin();
