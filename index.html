@@ -145,6 +145,7 @@
     }
 
     @keyframes bounceHint {
+
       0%,
       100% {
         transform: translate(-50%, 0);
@@ -1912,17 +1913,20 @@
       return `https://drive.google.com/thumbnail?id=${str}&sz=w800`;
     }
 
-    // 구글 시트 저장용 cells 정제 (초대용량 base64는 제외하고 드라이브 썸네일 URL은 확실하게 보존)
+    // 구글 시트 저장용 cells 정제 (드라이브 URL 및 경량화된 실시간 썸네일 데이터 보존)
     function sanitizeCellsForSheet(cells) {
       if (!cells || !Array.isArray(cells)) return [];
       return cells.map(c => {
         let cleanUrl = c.imgUrl || '';
-        // base64나 blob 임시 URL은 시트 셀 용량 초과 방지를 위해 제외
-        if (cleanUrl.startsWith('data:') || cleanUrl.startsWith('blob:')) {
+        if (cleanUrl.startsWith('blob:')) {
           cleanUrl = '';
         } else if (cleanUrl.startsWith('http')) {
-          // 구글 드라이브 썸네일 URL은 안전하게 보존하여 다른 기기 친구들에게 공유
           cleanUrl = formatDriveThumbnailUrl(cleanUrl);
+        } else if (cleanUrl.startsWith('data:image/')) {
+          // 용량 초과 방지: 15KB 이하의 경량 썸네일만 시트 F열에 저장하여 다른 기기 공유 허용
+          if (cleanUrl.length > 20000) {
+            cleanUrl = '';
+          }
         }
         return {
           id: Number(c.id),
@@ -1940,7 +1944,7 @@
     const DB = {
       _k: (col, id) => `opm_${col}_${id}`,
 
-      // 1. 학급 상태 로드 (실시간 다른 기기 썸네일 및 인증 상태 완벽 동기화)
+      // 1. 학급 상태 로드 (실시간 Apps Script 0초 즉시 조회 + 시트 fallback)
       async getClass(id) {
         let localCached = null;
         try {
@@ -1948,6 +1952,57 @@
           if (r) localCached = JSON.parse(r);
         } catch (e) { }
 
+        // ① 1순위: Apps Script 직통 API (구글 CDN 캐시 우회 0초 실시간 최신 동기화)
+        try {
+          const gasRes = await callGAS('getClassState', { classId: String(id) });
+          if (gasRes && gasRes.success && gasRes.data) {
+            const serverData = gasRes.data;
+            const serverCells = serverData.cells || [];
+
+            const mergedCells = (serverCells || []).map((srvCell, idx) => {
+              const locCell = localCached?.cells?.[idx];
+              const isCompleted = !!(srvCell.completed || (locCell && locCell.completed));
+
+              let finalImg = srvCell.imgUrl || locCell?.imgUrl || localStorage.getItem(`opm_img_${id}_${idx}`) || '';
+              if (finalImg && finalImg.startsWith('http')) {
+                finalImg = formatDriveThumbnailUrl(finalImg);
+              }
+
+              if (finalImg && !finalImg.startsWith('blob:')) {
+                try { localStorage.setItem(`opm_img_${id}_${idx}`, finalImg); } catch (e) { }
+              }
+
+              return {
+                id: idx,
+                title: srvCell.title || locCell?.title || (srvCell.isSpecial ? '특별 미션' : `자유 탐색 ${idx + 1}`),
+                desc: srvCell.desc || locCell?.desc || '',
+                isSpecial: !!(srvCell.isSpecial ?? locCell?.isSpecial),
+                isTeacher: !!(srvCell.isTeacher ?? locCell?.isTeacher),
+                freeNum: srvCell.freeNum ?? locCell?.freeNum ?? null,
+                completed: isCompleted,
+                imgUrl: finalImg
+              };
+            });
+
+            const data = {
+              classId: String(serverData.classId || id),
+              className: String(serverData.className || id),
+              themeId: String(serverData.themeId || localCached?.themeId || ''),
+              themeName: String(serverData.themeName || localCached?.themeName || ''),
+              teacherNum: serverData.teacherNum !== null && serverData.teacherNum !== undefined ? Number(serverData.teacherNum) : (localCached?.teacherNum || null),
+              cells: mergedCells.length ? mergedCells : (localCached?.cells || [])
+            };
+
+            if (!isUploadingPhoto) {
+              localStorage.setItem(this._k('classes', id), JSON.stringify(data));
+            }
+            return data;
+          }
+        } catch (gasErr) {
+          console.warn('[DB] GAS getClassState 실패, 시트 fallback 시도:', gasErr);
+        }
+
+        // ② 2순위: Google Sheets Viz API fallback
         try {
           const rows = await loadSheetJSON('학급상태');
           for (let i = 0; i < rows.length; i++) {
@@ -1956,23 +2011,16 @@
               const cellsRaw = r[5]?.v;
               const serverCells = cellsRaw ? JSON.parse(String(cellsRaw)) : [];
 
-              // 다른 기기에서 친구들이 업로드한 썸네일 URL과 인증 상태를 완벽하게 병합
               const mergedCells = (serverCells || []).map((srvCell, idx) => {
                 const locCell = localCached?.cells?.[idx];
                 const isCompleted = !!(srvCell.completed || (locCell && locCell.completed));
                 
-                // 서버에 저장된 드라이브 썸네일 URL 우선 적용 (다른 친구 기기 공유 목적)
-                let finalImgUrl = '';
-                if (srvCell.imgUrl && srvCell.imgUrl.startsWith('http')) {
-                  finalImgUrl = formatDriveThumbnailUrl(srvCell.imgUrl);
-                } else if (locCell && locCell.imgUrl) {
-                  finalImgUrl = locCell.imgUrl;
-                } else {
-                  finalImgUrl = localStorage.getItem(`opm_img_${id}_${idx}`) || '';
+                let finalImgUrl = srvCell.imgUrl || locCell?.imgUrl || localStorage.getItem(`opm_img_${id}_${idx}`) || '';
+                if (finalImgUrl && finalImgUrl.startsWith('http')) {
+                  finalImgUrl = formatDriveThumbnailUrl(finalImgUrl);
                 }
 
-                // 로컬 스토리지에도 최신 이미지 URL 캐시 동기화
-                if (finalImgUrl && !finalImgUrl.startsWith('blob:') && !finalImgUrl.startsWith('data:')) {
+                if (finalImgUrl && !finalImgUrl.startsWith('blob:')) {
                   try { localStorage.setItem(`opm_img_${id}_${idx}`, finalImgUrl); } catch (e) { }
                 }
 
@@ -1997,7 +2045,6 @@
                 cells: mergedCells.length ? mergedCells : (localCached?.cells || [])
               };
 
-              // 업로드 진행 중이 아닐 때만 로컬 캐시 업데이트
               if (!isUploadingPhoto) {
                 localStorage.setItem(this._k('classes', id), JSON.stringify(data));
               }
@@ -2005,7 +2052,7 @@
             }
           }
         } catch (e) {
-          console.warn('[DB] getClass 에러:', e);
+          console.warn('[DB] loadSheetJSON 에러:', e);
         }
 
         return localCached;
@@ -2125,10 +2172,9 @@
           });
 
           if (gasRes && gasRes.success) {
-            // fileId 또는 url 또는 thumbnailUrl 파싱
             const fileId = gasRes.fileId || gasRes.id || '';
             const rawUrl = gasRes.url || gasRes.thumbnailUrl || gasRes.driveUrl || '';
-            
+
             if (fileId) {
               return `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`;
             }
@@ -2411,7 +2457,7 @@
       pollingTimer = setInterval(async () => {
         // 사진 업로드 중이거나 활성 학급이 없으면 폴링 일시 건너뜀 (덮어쓰기 방지)
         if (!currentClassId || isUploadingPhoto) return;
-        
+
         try {
           const freshData = await DB.getClass(currentClassId);
           if (freshData && freshData.cells) {
@@ -2714,7 +2760,7 @@
 
         const cellTitle = currentClassData?.cells?.[targetIdx]?.title || `미션 ${targetIdx + 1}`;
 
-        // 4. 구글 드라이브 업로드 & 공유 썸네일 URL 획득
+        // 4. 구글 드라이브 업로드 시도
         let finalDriveUrl = '';
         try {
           finalDriveUrl = await DB.uploadPhoto(currentClassId, currentClassName, targetIdx, cellTitle, base64);
@@ -2722,16 +2768,25 @@
           console.warn('[Upload] 드라이브 업로드 오류:', err);
         }
 
+        // 5. 드라이브 URL이 있으면 드라이브 URL 우선, 없으면 초경량 썸네일(3KB)로 시트에 저장하여 다른 친구 기기에도 즉시 사진 표시
+        let sharingImgUrl = '';
         if (finalDriveUrl && finalDriveUrl.startsWith('http')) {
-          if (currentClassData && currentClassData.cells && currentClassData.cells[targetIdx]) {
-            currentClassData.cells[targetIdx].imgUrl = finalDriveUrl;
-            try {
-              localStorage.setItem(`opm_img_${currentClassId}_${targetIdx}`, finalDriveUrl);
-            } catch (e) { }
-          }
+          sharingImgUrl = formatDriveThumbnailUrl(finalDriveUrl);
+        } else {
+          // 드라이브 권한 미승인 대비: 다른 기기 친구들에게 공유할 초경량 썸네일 생성 (3KB 내외)
+          sharingImgUrl = await compressImgToBase64(file, 240, 0.42);
         }
 
-        // 5. 구글 시트에 인증 상태 및 썸네일 URL을 확실하게 저장
+        if (currentClassData && currentClassData.cells && currentClassData.cells[targetIdx]) {
+          currentClassData.cells[targetIdx].completed = true;
+          currentClassData.cells[targetIdx].imgUrl = sharingImgUrl;
+          try {
+            localStorage.setItem(`opm_img_${currentClassId}_${targetIdx}`, sharingImgUrl);
+            localStorage.setItem(DB._k('classes', currentClassId), JSON.stringify(currentClassData));
+          } catch (e) { }
+        }
+
+        // 6. 구글 시트에 인증 완료 상태 및 썸네일 URL을 확실하게 저장
         await DB.updClass(currentClassId, { cells: currentClassData.cells });
 
         hideToast();
@@ -2749,7 +2804,7 @@
       }
     };
 
-    function compressImgToBase64(file) {
+    function compressImgToBase64(file, maxDim = 640, quality = 0.65) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = ev => {
@@ -2757,12 +2812,20 @@
           img.onload = () => {
             const canvas = document.createElement('canvas');
             let w = img.width, h = img.height;
-            if (w > 640) { h = Math.round(h * 640 / w); w = 640; }
+            if (w > maxDim || h > maxDim) {
+              if (w > h) {
+                h = Math.round(h * maxDim / w);
+                w = maxDim;
+              } else {
+                w = Math.round(w * maxDim / h);
+                h = maxDim;
+              }
+            }
             canvas.width = w;
             canvas.height = h;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, w, h);
-            resolve(canvas.toDataURL('image/jpeg', 0.65));
+            resolve(canvas.toDataURL('image/jpeg', quality));
           };
           img.onerror = reject;
           img.src = ev.target.result;
