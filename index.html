@@ -1611,6 +1611,29 @@
         </div>
       </div>
 
+      <!-- ★ 관리자 긴급 지령 / 전체 공지 방송 패널 -->
+      <div class="hud" style="border-radius:.85rem;padding:1rem 1.25rem;margin-bottom:.85rem;border-left:3.5px solid #ef4444;background:linear-gradient(135deg, rgba(239,68,68,0.1) 0%, rgba(15,23,42,0.96) 100%)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem;flex-wrap:wrap;gap:.4rem">
+          <div style="font-size:.88rem;font-weight:900;color:#fca5a5;display:flex;align-items:center;gap:.45rem">
+            <i class="fa-solid fa-bullhorn" style="animation:pulse 1.5s infinite"></i> COMMAND BROADCAST (작전 지령 방송)
+          </div>
+          <span style="font-size:.68rem;color:var(--muted)">학생들 폰에 실시간 팝업으로 즉시 표시됩니다</span>
+        </div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+          <select id="broadcast-target" class="field" style="flex:0 0 140px;color:var(--amber);font-weight:700">
+            <option value="all">📢 전체 학급</option>
+            <option value="class1">1반 전용</option>
+            <option value="class2">2반 전용</option>
+            <option value="class3">3반 전용</option>
+            <option value="class4">4반 전용</option>
+          </select>
+          <input type="text" id="broadcast-text" class="field" placeholder="학생들에게 보낼 긴급 지령 메시지를 입력하세요 (예: 11시 40분까지 1층 로비 집합!)" style="flex:1;min-width:200px">
+          <button id="btn-broadcast-send" class="btn-primary" style="width:auto;padding:.65rem 1.25rem;font-size:.85rem;white-space:nowrap;background:#ef4444;color:#fff;box-shadow:0 0 12px rgba(239,68,68,0.4)">
+            <i class="fa-solid fa-paper-plane" style="margin-right:.3rem"></i>지령 전송
+          </button>
+        </div>
+      </div>
+
       <!-- Apps Script 설정 안내 (토글) -->
       <div id="script-info-box" class="script-notice hidden">
         <p style="margin-bottom:.5rem"><b style="color:var(--amber)">📋 구글 시트 & 드라이브 자동 연동 설정 (Apps Script)</b></p>
@@ -1720,6 +1743,26 @@
       <p style="font-size:.85rem;color:#cbd5e1;line-height:1.7;margin-bottom:1.5rem">16칸의 빙고판을 모두 완성하였습니다!<br>작전 완수를
         축하합니다. 🎉</p>
       <button onclick="document.getElementById('clear-modal').classList.remove('on')" class="btn-primary">확인 완료</button>
+    </div>
+  </div>
+
+  <!-- ── 긴급 작전 지령 팝업 모달 ── -->
+  <div id="notice-modal" class="modal-ov">
+    <div class="hud modal-box" style="border:2px solid #ef4444;box-shadow:0 0 40px rgba(239,68,68,0.5);text-align:center;max-width:380px;background:rgba(15,23,42,0.98)">
+      <div style="font-size:2.4rem;color:#ef4444;margin-bottom:.6rem;animation:pulse 1.2s infinite">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <div style="display:inline-block;font-size:.68rem;font-weight:900;letter-spacing:.08em;color:#fca5a5;background:rgba(239,68,68,0.18);border:1px solid rgba(239,68,68,0.5);padding:.25rem .75rem;border-radius:999px;margin-bottom:.6rem" id="notice-modal-badge">
+        COMMAND NOTICE
+      </div>
+      <h3 style="font-size:1.15rem;font-weight:900;color:#fff;margin-bottom:.85rem;letter-spacing:.04em">🚨 긴급 작전 본부 지령</h3>
+      <div id="notice-modal-content" style="font-size:.95rem;font-weight:700;color:#fde68a;line-height:1.6;background:rgba(0,0,0,0.4);border-radius:.6rem;padding:.9rem 1rem;margin-bottom:1.1rem;word-break:keep-all;border:1px dashed rgba(245,158,11,0.4)">
+        지령 내용
+      </div>
+      <div style="font-size:.68rem;color:var(--muted);margin-bottom:1.25rem" id="notice-modal-time"></div>
+      <button id="btn-notice-confirm" class="btn-primary" style="background:#ef4444;color:#fff;box-shadow:0 0 15px rgba(239,68,68,0.4)">
+        <i class="fa-solid fa-check" style="margin-right:.4rem"></i>지령 확인 완료
+      </button>
     </div>
   </div>
 
@@ -2022,7 +2065,7 @@
               const mergedCells = (serverCells || []).map((srvCell, idx) => {
                 const locCell = localCached?.cells?.[idx];
                 const isCompleted = !!(srvCell.completed || (locCell && locCell.completed));
-                
+
                 let finalImgUrl = srvCell.imgUrl || locCell?.imgUrl || localStorage.getItem(`opm_img_${id}_${idx}`) || '';
                 if (finalImgUrl && finalImgUrl.startsWith('http')) {
                   finalImgUrl = formatDriveThumbnailUrl(finalImgUrl);
@@ -2194,6 +2237,44 @@
           console.warn('[DB] uploadPhoto GAS 전송 오류:', err);
         }
         return '';
+      },
+
+      // ★ 6. 긴급 작전 지령 방송 (실시간 팝업)
+      async sendBroadcast(target, text) {
+        const noticeObj = {
+          id: 'n_' + Date.now(),
+          target: target,
+          text: text,
+          time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
+        };
+        localStorage.setItem('opm_latest_notice', JSON.stringify(noticeObj));
+        callGAS('broadcastNotice', noticeObj);
+        return noticeObj;
+      },
+
+      async getNotice(classId) {
+        try {
+          const gasRes = await callGAS('getNotice');
+          if (gasRes && gasRes.success && gasRes.notice) {
+            return gasRes.notice;
+          }
+        } catch (e) { }
+
+        try {
+          const rows = await loadSheetJSON('설정');
+          for (let i = 0; i < rows.length; i++) {
+            const r = rows[i].c;
+            if (r && String(r[0]?.v).trim() === '긴급지령' && r[1]?.v) {
+              return JSON.parse(String(r[1].v));
+            }
+          }
+        } catch (e) { }
+
+        try {
+          const localNotice = localStorage.getItem('opm_latest_notice');
+          if (localNotice) return JSON.parse(localNotice);
+        } catch (e) { }
+        return null;
       },
 
       async resetAll() {
@@ -2461,6 +2542,9 @@
       const feedbacks = await DB.getFeedbacks(clsId, clsName);
       renderFeedbackList(feedbacks);
 
+      // 1회 즉시 공지 확인
+      checkAndShowNotice();
+
       if (pollingTimer) clearInterval(pollingTimer);
       pollingTimer = setInterval(async () => {
         // 사진 업로드 중이거나, 백그라운드(화면 꺼짐) 상태면 트래픽 절약을 위해 일시 건너뜀 (100명 동시접속 최적화)
@@ -2478,6 +2562,8 @@
               renderGrid(freshData);
             }
           }
+          // 공지사항 팝업 실시간 체크
+          checkAndShowNotice();
         } catch (e) { }
       }, 2500);
 
@@ -3136,6 +3222,59 @@
       });
     }
     window.passCell = passCell;
+
+    /* ═══════════════════════════════════════════════════════════
+       ★ 긴급 작전 지령 팝업 시스템 (관리자 방송 & 실시간 팝업 수신)
+       ═══════════════════════════════════════════════════════════ */
+    async function checkAndShowNotice() {
+      if (!currentClassId) return;
+      try {
+        const notice = await DB.getNotice(currentClassId);
+        if (notice && notice.id && notice.text) {
+          const isTarget = (notice.target === 'all' || notice.target === currentClassId);
+          const lastReadId = localStorage.getItem(`opm_read_notice_${currentClassId}`);
+          if (isTarget && lastReadId !== notice.id) {
+            const badgeText = notice.target === 'all' ? '📢 전체 학급 작전 지령' : `📢 ${currentClassName} 전용 지령`;
+            document.getElementById('notice-modal-badge').textContent = badgeText;
+            document.getElementById('notice-modal-content').textContent = notice.text;
+            document.getElementById('notice-modal-time').textContent = `발신 시각: ${notice.time || '방금 전'}`;
+            document.getElementById('notice-modal').classList.add('on');
+
+            if (navigator.vibrate) {
+              try { navigator.vibrate([200, 100, 200, 100, 300]); } catch (e) { }
+            }
+
+            document.getElementById('btn-notice-confirm').onclick = () => {
+              document.getElementById('notice-modal').classList.remove('on');
+              localStorage.setItem(`opm_read_notice_${currentClassId}`, notice.id);
+            };
+          }
+        }
+      } catch (e) { }
+    }
+
+    document.getElementById('btn-broadcast-send').onclick = async () => {
+      const target = document.getElementById('broadcast-target').value;
+      const text = document.getElementById('broadcast-text').value.trim();
+      if (!text) return showModal('학생들에게 보낼 지령 메시지를 입력해주세요.');
+
+      const targetName = target === 'all' ? '전체 학급' : (CLASSES.find(c => c.id === target)?.name || target);
+      showModal(
+        `[${targetName}]에 아래 긴급 작전 지령을 방송하시겠습니까?<br><br>
+         <div style="background:rgba(239,68,68,0.15);border:1px dashed #ef4444;border-radius:.5rem;padding:.75rem;color:#fde68a;font-weight:700;margin:.5rem 0">
+           "${text}"
+         </div>
+         <span style="font-size:.75rem;color:var(--muted)">학생들의 스마트폰 화면에 즉시 팝업으로 표시됩니다.</span>`,
+        true,
+        async ok => {
+          if (!ok) return;
+          showToast('작전 지령 방송 전송중...', 1500);
+          await DB.sendBroadcast(target, text);
+          document.getElementById('broadcast-text').value = '';
+          showModal(`🎉 [${targetName}]에 긴급 작전 지령이 성공적으로 전송되었습니다!`);
+        }
+      );
+    };
 
     function toggleScriptInfo() {
       document.getElementById('script-info-box').classList.toggle('hidden');
