@@ -69,7 +69,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: opacity 1.2s ease-in-out, visibility 1.2s;
+      transition: opacity 1.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 1.4s;
     }
 
     #intro-bg {
@@ -77,12 +77,13 @@
       inset: 0;
       /* 사용자가 업로드한 용산 전쟁기념관 전경 원본 이미지 (톤다운 없음) */
       background: url('./%EC%9A%A9%EC%82%B0%20%EC%A0%84%EC%9F%81%EA%B8%B0%EB%85%90%EA%B4%80%20%EC%A0%84%EA%B2%BD.png') center/cover no-repeat;
-      filter: none;
-      transform: scale(1.04);
-      transition: transform 3s cubic-bezier(.25, 1, .5, 1);
+      filter: brightness(1.05) contrast(1.05);
+      transform: scale(1.35);
+      transition: transform 1.6s cubic-bezier(0.16, 1, 0.3, 1), filter 1.6s ease;
       display: flex;
       align-items: center;
       justify-content: center;
+      will-change: transform;
     }
 
     #intro-title {
@@ -95,6 +96,7 @@
       line-height: 1.25;
       pointer-events: none;
       z-index: 10;
+      transition: transform 1.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.2s ease;
     }
 
     #intro-title .mw {
@@ -107,7 +109,7 @@
       inset: 0;
       background: rgba(0, 0, 0, .97);
       pointer-events: none;
-      transition: background .8s ease;
+      transition: background 1.0s cubic-bezier(0.16, 1, 0.3, 1);
       z-index: 2;
     }
 
@@ -119,47 +121,54 @@
       touch-action: none;
     }
 
-    /* 화면 하단 터치 드래그 안내 문구 (시각 강화) */
+    /* 화면 하단 터치 드래그 안내 문구 (본문 폰트 통일 및 크기 최적화) */
     #intro-hint {
       position: absolute;
-      bottom: 2.5rem;
+      bottom: 2.2rem;
       left: 50%;
       transform: translateX(-50%);
-      font-size: clamp(0.95rem, 4vw, 1.15rem);
-      color: #fff;
-      font-weight: 800;
-      background: rgba(0, 0, 0, 0.85);
-      border: 1.5px solid rgba(245, 158, 11, 0.8);
+      font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: clamp(0.78rem, 3.2vw, 0.92rem);
+      color: #f8fafc;
+      font-weight: 600;
+      background: rgba(15, 23, 42, 0.88);
+      border: 1px solid rgba(245, 158, 11, 0.75);
       border-radius: 999px;
-      padding: 0.75rem 1.6rem;
+      padding: 0.55rem 1.35rem;
       white-space: nowrap;
       pointer-events: none;
       z-index: 10;
-      animation: bounceHint 1.8s infinite ease-in-out;
-      box-shadow: 0 0 25px rgba(245, 158, 11, 0.45);
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
-      letter-spacing: 0.03em;
+      animation: bounceHint 2s infinite ease-in-out;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 15px rgba(245, 158, 11, 0.3);
+      letter-spacing: 0.02em;
+      backdrop-filter: blur(8px);
     }
 
     @keyframes bounceHint {
-
       0%,
       100% {
         transform: translate(-50%, 0);
       }
 
       50% {
-        transform: translate(-50%, -8px);
+        transform: translate(-50%, -6px);
       }
     }
 
+    /* 줌 아웃 임팩트 효과: 1.35배 확대 상태에서 1.0배로 시네마틱 줌아웃 */
     .intro-revealed #intro-bg {
-      transform: scale(1);
+      transform: scale(1.0) !important;
+      filter: brightness(1.1) contrast(1.05);
+    }
+
+    .intro-revealed #intro-title {
+      transform: scale(0.96);
+      text-shadow: 0 4px 40px rgba(0, 0, 0, 1), 0 0 35px rgba(245, 158, 11, 1);
     }
 
     .intro-revealed #spotlight {
       background: rgba(0, 0, 0, 0) !important;
-      transition: background 1.2s ease;
+      transition: background 1.0s ease-out;
     }
 
     @keyframes pulse {
@@ -1430,10 +1439,12 @@
         gap: .4rem;
       }
     }
+
     /* 저장된 세션이 있는 경우 새로고침 시 인트로 완전 스킵 */
     html.has-saved-session #intro-wrapper {
       display: none !important;
     }
+
     html.has-saved-session #main-content {
       display: flex !important;
     }
@@ -1735,7 +1746,7 @@
     /* ═══════════════════════════════════════════════════════════
        ★ CONFIG — 설정 영역
        ═══════════════════════════════════════════════════════════ */
-    const DATA_VERSION = 'v20260828_r5';
+    const DATA_VERSION = 'v20260829_r1';
     const SHEET_ID = '1nWCYrJuGPscu5LmVX7nCfmXTgaOEI9ahJmXb2v4TKSg';
     const DRIVE_FOLDER_ID = '1Ixoi6vlBTXfHvm6OKNILbVSu6G9MmbAQ';
 
@@ -1867,21 +1878,54 @@
     }
 
     /* ═══════════════════════════════════════════════════════════
-       ★ 데이터베이스 레이어
+       ★ 데이터베이스 레이어 (16개 연속 인증 및 실시간 썸네일 완벽 보장)
        ═══════════════════════════════════════════════════════════ */
     let lastRenderedStateJson = '';
+    let isUploadingPhoto = false; // 사진 업로드 중 폴링 덮어쓰기 방지 락
 
-    // 구글 시트 저장용 cells 정제 (초대용량 base64로 인한 시트 50,000자 용량 초과 에러 완벽 방지)
+    // 구글 드라이브 파일 ID로부터 웹 렌더링용 썸네일 URL 생성
+    function formatDriveThumbnailUrl(rawUrlOrId) {
+      if (!rawUrlOrId) return '';
+      const str = String(rawUrlOrId).trim();
+      if (!str) return '';
+
+      // 이미 완전한 http URL인 경우
+      if (str.startsWith('http://') || str.startsWith('https://')) {
+        // 이미 lh3나 thumbnail URL 형태이면 그대로 사용
+        if (str.includes('lh3.googleusercontent.com') || str.includes('drive.google.com/thumbnail')) {
+          return str;
+        }
+        // drive.google.com/file/d/FILE_ID 형태인 경우 ID 추출
+        const match = str.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (match && match[1]) {
+          return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w800`;
+        }
+        // id=FILE_ID 형태인 경우
+        const idMatch = str.match(/id=([a-zA-Z0-9_-]+)/);
+        if (idMatch && idMatch[1]) {
+          return `https://drive.google.com/thumbnail?id=${idMatch[1]}&sz=w800`;
+        }
+        return str;
+      }
+
+      // 순수 파일 ID 문자열인 경우
+      return `https://drive.google.com/thumbnail?id=${str}&sz=w800`;
+    }
+
+    // 구글 시트 저장용 cells 정제 (초대용량 base64는 제외하고 드라이브 썸네일 URL은 확실하게 보존)
     function sanitizeCellsForSheet(cells) {
       if (!cells || !Array.isArray(cells)) return [];
       return cells.map(c => {
         let cleanUrl = c.imgUrl || '';
-        // base64나 blob URL은 시트 셀 용량 폭탄이 되므로 시트에는 드라이브 URL이나 상태 플래그만 저장
+        // base64나 blob 임시 URL은 시트 셀 용량 초과 방지를 위해 제외
         if (cleanUrl.startsWith('data:') || cleanUrl.startsWith('blob:')) {
           cleanUrl = '';
+        } else if (cleanUrl.startsWith('http')) {
+          // 구글 드라이브 썸네일 URL은 안전하게 보존하여 다른 기기 친구들에게 공유
+          cleanUrl = formatDriveThumbnailUrl(cleanUrl);
         }
         return {
-          id: c.id,
+          id: Number(c.id),
           title: c.title || '',
           desc: c.desc || '',
           isSpecial: !!c.isSpecial,
@@ -1896,7 +1940,7 @@
     const DB = {
       _k: (col, id) => `opm_${col}_${id}`,
 
-      // 1. 학급 상태 로드 (로컬 완료 상태 보존 병합)
+      // 1. 학급 상태 로드 (실시간 다른 기기 썸네일 및 인증 상태 완벽 동기화)
       async getClass(id) {
         let localCached = null;
         try {
@@ -1908,20 +1952,39 @@
           const rows = await loadSheetJSON('학급상태');
           for (let i = 0; i < rows.length; i++) {
             const r = rows[i].c;
-            if (r && String(r[0]?.v) === id) {
+            if (r && String(r[0]?.v) === String(id)) {
               const cellsRaw = r[5]?.v;
               const serverCells = cellsRaw ? JSON.parse(String(cellsRaw)) : [];
 
-              // 안전한 병합: 로컬에서 이미 완료한 미션이 서버 지연으로 덮어씌워져 미완료로 리셋되는 현상 완벽 방지
+              // 다른 기기에서 친구들이 업로드한 썸네일 URL과 인증 상태를 완벽하게 병합
               const mergedCells = (serverCells || []).map((srvCell, idx) => {
                 const locCell = localCached?.cells?.[idx];
-                const isCompleted = srvCell.completed || (locCell && locCell.completed);
-                const localImg = locCell?.imgUrl || localStorage.getItem(`opm_img_${id}_${idx}`) || '';
+                const isCompleted = !!(srvCell.completed || (locCell && locCell.completed));
+                
+                // 서버에 저장된 드라이브 썸네일 URL 우선 적용 (다른 친구 기기 공유 목적)
+                let finalImgUrl = '';
+                if (srvCell.imgUrl && srvCell.imgUrl.startsWith('http')) {
+                  finalImgUrl = formatDriveThumbnailUrl(srvCell.imgUrl);
+                } else if (locCell && locCell.imgUrl) {
+                  finalImgUrl = locCell.imgUrl;
+                } else {
+                  finalImgUrl = localStorage.getItem(`opm_img_${id}_${idx}`) || '';
+                }
+
+                // 로컬 스토리지에도 최신 이미지 URL 캐시 동기화
+                if (finalImgUrl && !finalImgUrl.startsWith('blob:') && !finalImgUrl.startsWith('data:')) {
+                  try { localStorage.setItem(`opm_img_${id}_${idx}`, finalImgUrl); } catch (e) { }
+                }
+
                 return {
-                  ...srvCell,
-                  completed: !!isCompleted,
-                  imgUrl: srvCell.imgUrl || localImg,
-                  title: srvCell.title || locCell?.title || ''
+                  id: idx,
+                  title: srvCell.title || locCell?.title || (srvCell.isSpecial ? '특별 미션' : `자유 탐색 ${idx + 1}`),
+                  desc: srvCell.desc || locCell?.desc || '',
+                  isSpecial: !!(srvCell.isSpecial ?? locCell?.isSpecial),
+                  isTeacher: !!(srvCell.isTeacher ?? locCell?.isTeacher),
+                  freeNum: srvCell.freeNum ?? locCell?.freeNum ?? null,
+                  completed: isCompleted,
+                  imgUrl: finalImgUrl
                 };
               });
 
@@ -1933,21 +1996,27 @@
                 teacherNum: r[4]?.v ? Number(r[4].v) : (localCached?.teacherNum || null),
                 cells: mergedCells.length ? mergedCells : (localCached?.cells || [])
               };
-              localStorage.setItem(this._k('classes', id), JSON.stringify(data));
+
+              // 업로드 진행 중이 아닐 때만 로컬 캐시 업데이트
+              if (!isUploadingPhoto) {
+                localStorage.setItem(this._k('classes', id), JSON.stringify(data));
+              }
               return data;
             }
           }
-        } catch (e) { }
+        } catch (e) {
+          console.warn('[DB] getClass 에러:', e);
+        }
 
         return localCached;
       },
 
-      // 2. 학급 상태 저장
+      // 2. 학급 상태 저장 (구글 시트 & 로컬 동시 보존)
       async setClass(id, data) {
         localStorage.setItem(this._k('classes', id), JSON.stringify(data));
         const cls = CLASSES.find(c => c.id === id);
         const cleanCells = sanitizeCellsForSheet(data.cells);
-        callGAS('saveClassState', {
+        return await callGAS('saveClassState', {
           classId: id,
           className: data.name || data.className || cls?.name || id,
           themeId: data.themeId || '',
@@ -1963,7 +2032,7 @@
         localStorage.setItem(this._k('classes', id), JSON.stringify(updated));
         const cls = CLASSES.find(c => c.id === id);
         const cleanCells = sanitizeCellsForSheet(updated.cells);
-        await callGAS('saveClassState', {
+        const res = await callGAS('saveClassState', {
           classId: id,
           className: updated.className || updated.name || cls?.name || id,
           themeId: updated.themeId || '',
@@ -1971,7 +2040,7 @@
           teacherNum: updated.teacherNum || '',
           cells: cleanCells
         });
-        return updated;
+        return { updated, res };
       },
 
       // 3. 전체 학급 현황 (관리자)
@@ -2043,21 +2112,34 @@
         return r ? JSON.parse(r) : [];
       },
 
-      // 5. 구글 드라이브 반별 폴더 자동 저장
+      // ★ 5. 구글 드라이브 반별 폴더 자동 저장 & 실시간 공유 썸네일 URL 추출
       async uploadPhoto(cid, className, cellIdx, cellTitle, base64) {
-        const gasRes = await callGAS('uploadPhoto', {
-          classId: cid,
-          className: className,
-          cellId: cellIdx,
-          cellTitle: cellTitle,
-          imageBase64: base64,
-          mimeType: 'image/jpeg'
-        });
-        if (gasRes && gasRes.success && (gasRes.url || gasRes.fileId)) {
-          const driveUrl = gasRes.url || `https://lh3.googleusercontent.com/d/${gasRes.fileId}`;
-          return driveUrl;
+        try {
+          const gasRes = await callGAS('uploadPhoto', {
+            classId: cid,
+            className: className,
+            cellId: Number(cellIdx),
+            cellTitle: cellTitle,
+            imageBase64: base64,
+            mimeType: 'image/jpeg'
+          });
+
+          if (gasRes && gasRes.success) {
+            // fileId 또는 url 또는 thumbnailUrl 파싱
+            const fileId = gasRes.fileId || gasRes.id || '';
+            const rawUrl = gasRes.url || gasRes.thumbnailUrl || gasRes.driveUrl || '';
+            
+            if (fileId) {
+              return `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`;
+            }
+            if (rawUrl) {
+              return formatDriveThumbnailUrl(rawUrl);
+            }
+          }
+        } catch (err) {
+          console.warn('[DB] uploadPhoto GAS 전송 오류:', err);
         }
-        return base64;
+        return '';
       },
 
       async resetAll() {
@@ -2143,7 +2225,7 @@
         w.style.visibility = 'hidden';
         document.getElementById('main-content').classList.add('on');
         window.scrollTo({ top: 0, behavior: 'smooth' });
-      }, 1200);
+      }, 1400);
     }
     window.unlockIntro = unlockIntro;
 
@@ -2317,7 +2399,7 @@
       let data = await DB.getClass(clsId);
       if (!data) {
         data = { name: clsName, className: clsName, themeName: null, themeId: null, teacherNum: null, cells: [] };
-        DB.setClass(clsId, data);
+        await DB.setClass(clsId, data);
       }
 
       renderGrid(data);
@@ -2327,25 +2409,31 @@
 
       if (pollingTimer) clearInterval(pollingTimer);
       pollingTimer = setInterval(async () => {
-        if (!currentClassId) return;
-        const freshData = await DB.getClass(currentClassId);
-        if (freshData) {
-          const freshJson = JSON.stringify({
-            themeName: freshData.themeName,
-            teacherNum: freshData.teacherNum,
-            cells: freshData.cells
-          });
-          if (freshJson !== lastRenderedStateJson) {
-            renderGrid(freshData);
+        // 사진 업로드 중이거나 활성 학급이 없으면 폴링 일시 건너뜀 (덮어쓰기 방지)
+        if (!currentClassId || isUploadingPhoto) return;
+        
+        try {
+          const freshData = await DB.getClass(currentClassId);
+          if (freshData && freshData.cells) {
+            const freshJson = JSON.stringify({
+              themeName: freshData.themeName,
+              teacherNum: freshData.teacherNum,
+              cells: freshData.cells.map(c => ({ id: c.id, completed: c.completed, imgUrl: c.imgUrl, title: c.title }))
+            });
+            if (freshJson !== lastRenderedStateJson && !isUploadingPhoto) {
+              renderGrid(freshData);
+            }
           }
-        }
+        } catch (e) { }
       }, 1500);
 
       if (fbPollingTimer) clearInterval(fbPollingTimer);
       fbPollingTimer = setInterval(async () => {
-        if (!currentClassId) return;
-        const freshFbs = await DB.getFeedbacks(currentClassId, currentClassName);
-        renderFeedbackList(freshFbs);
+        if (!currentClassId || isUploadingPhoto) return;
+        try {
+          const freshFbs = await DB.getFeedbacks(currentClassId, currentClassName);
+          renderFeedbackList(freshFbs);
+        } catch (e) { }
       }, 3000);
     }
 
@@ -2414,7 +2502,7 @@
       lastRenderedStateJson = JSON.stringify({
         themeName: data?.themeName,
         teacherNum: data?.teacherNum,
-        cells: data?.cells
+        cells: (data?.cells || []).map(c => ({ id: c.id, completed: c.completed, imgUrl: c.imgUrl, title: c.title }))
       });
 
       if (!data || !data.themeName) {
@@ -2445,28 +2533,32 @@
 
       grid.innerHTML = '';
       let comp = 0;
-      (data.cells || []).forEach(cell => {
+      (data.cells || []).forEach((cell, idx) => {
         if (cell.completed) comp++;
         const div = document.createElement('div');
         div.className = `bc ${cell.isSpecial ? 'special' : 'normal'} ${cell.completed ? 'done' : ''}`;
 
         if (cell.completed) {
-          // 썸네일 캐시 안전 복원
+          // 썸네일 복원 (서버 드라이브 URL -> 로컬 캐시 -> fallback)
           const cachedImg = localStorage.getItem(`opm_img_${currentClassId}_${cell.id}`);
-          const imgSrc = cell.imgUrl || cachedImg || 'https://images.unsplash.com/photo-1590496793929-36417d3117de?auto=format&fit=crop&w=400&q=80';
-          if (cell.imgUrl && !cell.imgUrl.startsWith('blob:') && !cell.imgUrl.startsWith('data:')) {
-            try { localStorage.setItem(`opm_img_${currentClassId}_${cell.id}`, cell.imgUrl); } catch (e) { }
+          let imgSrc = cell.imgUrl || cachedImg || '';
+          if (imgSrc && imgSrc.startsWith('http')) {
+            imgSrc = formatDriveThumbnailUrl(imgSrc);
           }
-          const missionLabel = (cell.isTeacher && data.teacherNum) ? `선생님+${data.teacherNum}번` : (cell.isSpecial ? cell.title : `자유 탐색 ${cell.freeNum || ''}`);
+          if (!imgSrc) {
+            imgSrc = 'https://images.unsplash.com/photo-1590496793929-36417d3117de?auto=format&fit=crop&w=400&q=80';
+          }
+
+          const missionLabel = (cell.isTeacher && data.teacherNum) ? `선생님+${data.teacherNum}번` : (cell.isSpecial ? cell.title : `자유 탐색 ${cell.freeNum || (idx + 1)}`);
           div.innerHTML = `
-            <img src="${imgSrc}" alt="${cell.title}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit;" onerror="this.src='https://images.unsplash.com/photo-1590496793929-36417d3117de?auto=format&fit=crop&w=400&q=80'">
+            <img src="${imgSrc}" alt="${cell.title}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit;" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://images.unsplash.com/photo-1590496793929-36417d3117de?auto=format&fit=crop&w=400&q=80';}">
             <div style="position:absolute;inset:0;background:rgba(0,0,0,0.48);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:.2rem;border-radius:inherit;">
               <i class="fa-solid fa-circle-check" style="color:#10b981;font-size:1.1rem;margin-bottom:.2rem;text-shadow:0 0 8px rgba(16,185,129,0.8)"></i>
               <span class="bc-label" style="color:#fff;font-weight:800;font-size:.62rem;text-shadow:0 1px 4px #000">${missionLabel}</span>
               <span class="cell-status-badge">📸 인증 완료</span>
             </div>`;
         } else {
-          let label = cell.isSpecial ? cell.title : `자유 탐색 ${cell.freeNum || ''}`;
+          let label = cell.isSpecial ? cell.title : `자유 탐색 ${cell.freeNum || (idx + 1)}`;
           let sub = cell.isSpecial ? cell.desc : '📸 전시품 찾아 촬영';
           if (cell.isTeacher) {
             label = data.teacherNum ? `선생님+${data.teacherNum}번` : '👑 번호 추첨 전';
@@ -2524,11 +2616,14 @@
        ★ 셀 클릭 핸들러 & 사진 미리보기/교체
        ═══════════════════════════════════════════════════════════ */
     async function handleCellClick(cell, data) {
+      const cellIdx = Number(cell.id);
+
       if (cell.completed && cell.imgUrl) {
-        selectedCellIdx = cell.id;
+        selectedCellIdx = cellIdx;
         const missionLabel = (cell.isTeacher && data.teacherNum) ? `선생님+${data.teacherNum}번 접선 인증` : `${cell.title} 인증 사진`;
         document.getElementById('preview-title').textContent = missionLabel;
-        document.getElementById('preview-img').src = cell.imgUrl;
+        const previewImg = document.getElementById('preview-img');
+        previewImg.src = formatDriveThumbnailUrl(cell.imgUrl);
         document.getElementById('photo-modal').classList.add('on');
         return;
       }
@@ -2554,77 +2649,90 @@
                 false, async () => {
                   const d = await DB.getClass(currentClassId);
                   const cells = [...d.cells];
-                  cells[cell.id].title = `선생님+${num}번`;
-                  renderGrid({ ...d, teacherNum: num, cells });
+                  cells[cellIdx].title = `선생님+${num}번`;
+                  const updatedObj = { ...d, teacherNum: num, cells };
+                  renderGrid(updatedObj);
                   await DB.updClass(currentClassId, { teacherNum: num, cells });
-                  selectedCellIdx = cell.id;
+                  selectedCellIdx = cellIdx;
                   document.getElementById('file-uploader').click();
                 }
               );
             }
           );
         } else {
-          selectedCellIdx = cell.id;
+          selectedCellIdx = cellIdx;
           document.getElementById('file-uploader').click();
         }
         return;
       }
 
       // 일반 및 기타 특별 미션
-      selectedCellIdx = cell.id;
+      selectedCellIdx = cellIdx;
       document.getElementById('file-uploader').click();
     }
 
     /* ═══════════════════════════════════════════════════════════
-       ★ 초고속 사진 업로드 & 구글 드라이브/시트 완벽 연동
+       ★ 초고속 사진 업로드 & 구글 드라이브/시트 완벽 연동 (16개 연속 인증 보장)
        ═══════════════════════════════════════════════════════════ */
     document.getElementById('file-uploader').onchange = async e => {
       const file = e.target.files[0];
-      if (!file || selectedCellIdx === null) return;
+      if (!file || selectedCellIdx === null || selectedCellIdx === undefined) return;
+
+      const targetIdx = Number(selectedCellIdx);
+      isUploadingPhoto = true; // 업로드 중 폴링 덮어쓰기 방지 락 활성화
 
       try {
         showToast('인증 사진 처리 및 저장 중...', 0);
 
-        // 1. 즉시 로컬 Blob URL 생성하여 화면에 0.001초만에 즉각 반영
+        // 1. 최신 학급 데이터 확보
+        if (!currentClassData || !currentClassData.cells || !currentClassData.cells[targetIdx]) {
+          const fetched = await DB.getClass(currentClassId);
+          if (fetched && fetched.cells) currentClassData = fetched;
+        }
+
+        // 2. 즉시 로컬 Blob URL 생성하여 화면에 0.001초만에 즉각 반영
         const localBlobUrl = URL.createObjectURL(file);
-        if (currentClassData && currentClassData.cells && currentClassData.cells[selectedCellIdx]) {
-          currentClassData.cells[selectedCellIdx].completed = true;
-          currentClassData.cells[selectedCellIdx].imgUrl = localBlobUrl;
+        if (currentClassData && currentClassData.cells && currentClassData.cells[targetIdx]) {
+          currentClassData.cells[targetIdx].completed = true;
+          currentClassData.cells[targetIdx].imgUrl = localBlobUrl;
           localStorage.setItem(DB._k('classes', currentClassId), JSON.stringify(currentClassData));
           renderGrid(currentClassData);
         }
 
-        // 2. 이미지 압축 (모바일 전송 최적화)
+        // 3. 이미지 압축 (모바일 전송 최적화)
         const base64 = await compressImgToBase64(file);
         try {
-          localStorage.setItem(`opm_img_${currentClassId}_${selectedCellIdx}`, base64);
+          localStorage.setItem(`opm_img_${currentClassId}_${targetIdx}`, base64);
         } catch (err) { }
 
-        // 로컬 데이터에 base64 반영
-        if (currentClassData && currentClassData.cells && currentClassData.cells[selectedCellIdx]) {
-          currentClassData.cells[selectedCellIdx].completed = true;
-          currentClassData.cells[selectedCellIdx].imgUrl = base64;
+        // 로컬 데이터에 base64 반영 (네트워크 지연 시에도 내 폰에서는 즉시 유지)
+        if (currentClassData && currentClassData.cells && currentClassData.cells[targetIdx]) {
+          currentClassData.cells[targetIdx].completed = true;
+          currentClassData.cells[targetIdx].imgUrl = base64;
           localStorage.setItem(DB._k('classes', currentClassId), JSON.stringify(currentClassData));
         }
 
-        const cellTitle = currentClassData?.cells?.[selectedCellIdx]?.title || '미션';
+        const cellTitle = currentClassData?.cells?.[targetIdx]?.title || `미션 ${targetIdx + 1}`;
 
-        // 3. 구글 드라이브 업로드 및 시트 상태 저장 완료 보장
+        // 4. 구글 드라이브 업로드 & 공유 썸네일 URL 획득
+        let finalDriveUrl = '';
         try {
-          const driveUrl = await DB.uploadPhoto(currentClassId, currentClassName, selectedCellIdx, cellTitle, base64);
-          if (driveUrl && driveUrl.startsWith('http')) {
-            if (currentClassData && currentClassData.cells && currentClassData.cells[selectedCellIdx]) {
-              currentClassData.cells[selectedCellIdx].imgUrl = driveUrl;
-              try {
-                localStorage.setItem(`opm_img_${currentClassId}_${selectedCellIdx}`, driveUrl);
-              } catch (e) { }
-            }
-          }
-          // 구글 시트에 완료 상태 확실히 저장
-          await DB.updClass(currentClassId, { cells: currentClassData.cells });
+          finalDriveUrl = await DB.uploadPhoto(currentClassId, currentClassName, targetIdx, cellTitle, base64);
         } catch (err) {
-          console.warn('드라이브/시트 전송:', err);
+          console.warn('[Upload] 드라이브 업로드 오류:', err);
         }
+
+        if (finalDriveUrl && finalDriveUrl.startsWith('http')) {
+          if (currentClassData && currentClassData.cells && currentClassData.cells[targetIdx]) {
+            currentClassData.cells[targetIdx].imgUrl = finalDriveUrl;
+            try {
+              localStorage.setItem(`opm_img_${currentClassId}_${targetIdx}`, finalDriveUrl);
+            } catch (e) { }
+          }
+        }
+
+        // 5. 구글 시트에 인증 상태 및 썸네일 URL을 확실하게 저장
+        await DB.updClass(currentClassId, { cells: currentClassData.cells });
 
         hideToast();
         showToast('미션 인증이 완료되었습니다! 🎯', 2000);
@@ -2635,6 +2743,8 @@
         hideToast();
         showModal('사진 처리 중 오류가 발생했습니다.\n다시 시도해주세요.');
       } finally {
+        isUploadingPhoto = false; // 락 해제
+        selectedCellIdx = null;
         e.target.value = '';
       }
     };
