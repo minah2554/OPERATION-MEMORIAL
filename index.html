@@ -1071,6 +1071,26 @@
       background: rgba(129, 140, 248, .22);
     }
 
+    .btn-reassign {
+      background: rgba(245, 158, 11, .12);
+      border-color: rgba(245, 158, 11, .3);
+      color: var(--amber);
+    }
+
+    .btn-reassign:hover {
+      background: rgba(245, 158, 11, .25);
+    }
+
+    .btn-reset-cls {
+      background: rgba(239, 68, 68, .12);
+      border-color: rgba(239, 68, 68, .3);
+      color: #f87171;
+    }
+
+    .btn-reset-cls:hover {
+      background: rgba(239, 68, 68, .25);
+    }
+
     /* 개별 반 탭 패널 (미니 그리드 & X 표시) */
     .cls-panel-wrap {
       display: grid;
@@ -2517,6 +2537,26 @@
         } catch (e) { }
       },
 
+      async resetClass(classId) {
+        localStorage.removeItem(this._k('classes', classId));
+        localStorage.removeItem(`opm_read_notice_${classId}`);
+        for (let i = 0; i < 16; i++) {
+          localStorage.removeItem(`opm_img_${classId}_${i}`);
+        }
+        const emptyCells = makeInitialCells();
+        const cls = CLASSES.find(c => c.id === classId);
+        const resetData = {
+          classId: classId,
+          className: cls?.name || classId,
+          themeId: '',
+          themeName: '',
+          teacherNum: null,
+          cells: emptyCells
+        };
+        localStorage.setItem(this._k('classes', classId), JSON.stringify(resetData));
+        return await this.setClass(classId, resetData);
+      },
+
       async resetAll() {
         localStorage.clear();
         localStorage.setItem('opm_cache_version', DATA_VERSION);
@@ -3375,21 +3415,122 @@
             <span class="adm-card-cnt">${comp}/16 (${pct}%)</span>
           </div>
           <div class="adm-card-theme">테마: ${d.themeName || '미지정'}</div>
-          <div style="font-size:.68rem;color:#94a3b8;margin-bottom:.45rem;display:flex;gap:.5rem">
+          <div style="font-size:.68rem;color:#94a3b8;margin-bottom:.45rem;display:flex;gap:.5rem;flex-wrap:wrap">
             <span>학생 인증: <b style="color:var(--green)">${studentComp}</b></span>
             <span>관리자 패스: <b style="color:var(--amber)">${passComp}</b></span>
+            <span>접선 번호: <b style="color:var(--amber)">${d.teacherNum ? d.teacherNum + '번' : '미추첨'}</b></span>
           </div>
           <div class="adm-prog-bg"><div class="adm-prog-fill" style="width:${pct}%"></div></div>
-          <div class="adm-card-btns">
-            <button class="btn-sm btn-monitor" onclick="monitorBoard('${d.id}','${d.name || d.id}')"><i class="fa-solid fa-eye" style="margin-right:.3rem"></i>보드 감시</button>
+          <div class="adm-card-btns" style="display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.6rem">
+            <button class="btn-sm btn-monitor" onclick="monitorBoard('${d.id}','${d.name || d.id}')"><i class="fa-solid fa-eye" style="margin-right:.2rem"></i>감시</button>
             <button class="btn-sm btn-pass"    onclick="passCell('${d.id}')"><i class="fa-solid fa-plus" style="margin-right:.2rem"></i>자유패스</button>
+            <button class="btn-sm btn-reassign" onclick="openTeacherNumModal('${d.id}','${d.name || d.id}',${d.teacherNum || 'null'})" title="접선 번호 직접 지정 또는 무작위 재추첨"><i class="fa-solid fa-dice" style="margin-right:.2rem"></i>번호재배정</button>
             <button class="btn-sm btn-fb"      onclick="showFbModal('${d.id}','${d.name || d.id}')"><i class="fa-solid fa-comments" style="margin-right:.2rem"></i>소감</button>
+            <button class="btn-sm btn-reset-cls" onclick="resetClassDataConfirm('${d.id}','${d.name || d.id}')" title="해당 반 데이터만 초기화"><i class="fa-solid fa-rotate-left" style="margin-right:.2rem"></i>반초기화</button>
           </div>`;
         cont.appendChild(card);
       });
       await renderAdminNoticeHistory();
     }
     window.refreshAdmin = refreshAdmin;
+
+    // ★ 담임 접선 번호 관리 & 재배정 모달
+    async function openTeacherNumModal(clsId, clsName, curNum) {
+      const curClassInfo = CLASSES.find(c => c.id === clsId);
+      const maxStudent = (curClassInfo && curClassInfo.maxNum) ? curClassInfo.maxNum : TEACHER_NUM_MAX;
+      const excludeList = (curClassInfo && Array.isArray(curClassInfo.excludeNums)) ? curClassInfo.excludeNums : [];
+
+      const curStatusText = curNum ? `<b style="color:var(--amber);font-size:1.1rem">${curNum}번</b>` : '<span style="color:var(--muted)">미배정</span>';
+      const excludeText = excludeList.length ? `제외(결석): ${excludeList.join(', ')}번` : '제외 번호 없음';
+
+      showModal(
+        `🎲 <b>[${clsName}] 접선 학생 번호 재배정</b><br><br>
+         현재 번호: ${curStatusText}<br>
+         <span style="font-size:.72rem;color:var(--muted)">전체: 1~${maxStudent}번 (${excludeText})</span><br><br>
+         <div style="background:rgba(0,0,0,0.35);border:1px dashed var(--border2);border-radius:.6rem;padding:.75rem;margin-bottom:.75rem;text-align:left">
+           <p style="font-size:.75rem;color:#cbd5e1;margin-bottom:.35rem"><b>① 번호 직접 지정:</b></p>
+           <div style="display:flex;gap:.4rem">
+             <input type="number" id="admin-manual-teacher-num" class="field" placeholder="학생 번호 (1~${maxStudent})" min="1" max="${maxStudent}" style="text-align:center;font-weight:700;font-size:.85rem" />
+             <button class="btn-sm btn-reassign" style="padding:.4rem .75rem" onclick="applyManualTeacherNum('${clsId}','${clsName}')">지정</button>
+           </div>
+         </div>
+         <div style="text-align:left">
+           <p style="font-size:.75rem;color:#cbd5e1;margin-bottom:.35rem"><b>② 무작위 자동 재추첨:</b></p>
+           <button class="btn-sm btn-reassign" style="width:100%;padding:.65rem;font-size:.82rem" onclick="applyRandomTeacherNum('${clsId}','${clsName}')">
+             <i class="fa-solid fa-dice" style="margin-right:.3rem"></i>결석생 제외 무작위 재추첨
+           </button>
+         </div>`,
+        false
+      );
+    }
+    window.openTeacherNumModal = openTeacherNumModal;
+
+    async function applyManualTeacherNum(clsId, clsName) {
+      const inputEl = document.getElementById('admin-manual-teacher-num');
+      const val = parseInt(inputEl?.value?.trim(), 10);
+      const curClassInfo = CLASSES.find(c => c.id === clsId);
+      const maxStudent = (curClassInfo && curClassInfo.maxNum) ? curClassInfo.maxNum : TEACHER_NUM_MAX;
+      if (isNaN(val) || val < 1 || val > maxStudent) {
+        return showToast(`1부터 ${maxStudent} 사이의 유효한 번호를 입력해주세요.`, 2000);
+      }
+      document.getElementById('cm').classList.remove('on');
+      showToast(`[${clsName}] 접선 번호 ${val}번으로 변경중...`, 1500);
+
+      const d = await DB.getClass(clsId);
+      const cells = [...(d.cells || [])];
+      cells.forEach(c => {
+        if (c.isTeacher) c.title = `선생님+${val}번`;
+      });
+      await DB.updClass(clsId, { teacherNum: val, cells });
+      showToast(`🎉 [${clsName}] 접선 번호가 ${val}번으로 변경되었습니다!`, 2000);
+      await refreshAdmin();
+    }
+    window.applyManualTeacherNum = applyManualTeacherNum;
+
+    async function applyRandomTeacherNum(clsId, clsName) {
+      const curClassInfo = CLASSES.find(c => c.id === clsId);
+      const maxStudent = (curClassInfo && curClassInfo.maxNum) ? curClassInfo.maxNum : TEACHER_NUM_MAX;
+      const excludeList = (curClassInfo && Array.isArray(curClassInfo.excludeNums)) ? curClassInfo.excludeNums : [];
+
+      const candidatePool = [];
+      for (let n = 1; n <= maxStudent; n++) {
+        if (!excludeList.includes(n)) candidatePool.push(n);
+      }
+      let num = candidatePool.length > 0
+        ? candidatePool[Math.floor(Math.random() * candidatePool.length)]
+        : Math.floor(Math.random() * maxStudent) + 1;
+
+      document.getElementById('cm').classList.remove('on');
+      showToast(`[${clsName}] 접선 번호 ${num}번으로 재추첨중...`, 1500);
+
+      const d = await DB.getClass(clsId);
+      const cells = [...(d.cells || [])];
+      cells.forEach(c => {
+        if (c.isTeacher) c.title = `선생님+${num}번`;
+      });
+      await DB.updClass(clsId, { teacherNum: num, cells });
+      showToast(`🎲 [${clsName}] 접선 번호가 ${num}번으로 새로 배정되었습니다!`, 2000);
+      await refreshAdmin();
+    }
+    window.applyRandomTeacherNum = applyRandomTeacherNum;
+
+    // ★ 개별 반 데이터 초기화
+    async function resetClassDataConfirm(clsId, clsName) {
+      showModal(
+        `<b>[${clsName}]</b>의 빙고판 진행 상태와<br>인증 사진을 <b style="color:#f87171">해당 반만 초기화</b>하시겠습니까?<br><br>
+         <span style="font-size:.75rem;color:var(--muted)">⚠️ 다른 반의 진행 데이터는 그대로 유지됩니다.</span>`,
+        true,
+        async ok => {
+          if (!ok) return;
+          showToast(`[${clsName}] 초기화 진행중...`, 0);
+          await DB.resetClass(clsId);
+          hideToast();
+          showModal(`🎉 [${clsName}]의 모든 빙고 데이터가 성공적으로 초기화되었습니다.`);
+          await refreshAdmin();
+        }
+      );
+    }
+    window.resetClassDataConfirm = resetClassDataConfirm;
 
     async function resetAllDataConfirm() {
       showModal('모든 학급의 빙고 진행 상태와 소감 기록을<br><b style="color:#f87171">완전히 초기화(리셋)</b>하시겠습니까?<br><span style="font-size:.72rem;color:var(--muted)">삭제된 데이터는 복구할 수 없습니다.</span>', true, async ok => {
