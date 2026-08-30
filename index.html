@@ -1952,10 +1952,10 @@
 
     // 기본 반 목록
     let CLASSES = [
-      { id: 'class1', name: '1반', pass: '0000' },
-      { id: 'class2', name: '2반', pass: '2222' },
-      { id: 'class3', name: '3반', pass: '3333' },
-      { id: 'class4', name: '4반', pass: '4444' },
+      { id: 'class1', name: '1반', pass: '0000', maxNum: 30, excludeNums: [] },
+      { id: 'class2', name: '2반', pass: '2222', maxNum: 30, excludeNums: [] },
+      { id: 'class3', name: '3반', pass: '3333', maxNum: 30, excludeNums: [] },
+      { id: 'class4', name: '4반', pass: '4444', maxNum: 30, excludeNums: [] },
     ];
     let sheetAdminPassword = 'admin123';
     const TEACHER_NUM_MAX = 30;
@@ -2033,16 +2033,27 @@
     }
 
     async function initConfig() {
-      // 1. 반 목록 로드
+      // 1. 반 목록 로드 (A열: 반이름, B열: 비밀번호, C열: 학생수, D열: 제외번호)
       try {
         const classRows = await loadSheetJSON('반목록');
         if (classRows.length) {
           const loaded = classRows
-            .map((r, i) => ({
-              id: 'class' + (i + 1),
-              name: String(r.c?.[0]?.v ?? `${i + 1}반`),
-              pass: String(r.c?.[1]?.v ?? '0000')
-            }))
+            .map((r, i) => {
+              const name = String(r.c?.[0]?.v ?? `${i + 1}반`).trim();
+              const pass = String(r.c?.[1]?.v ?? '0000').trim();
+              const maxNum = Number(r.c?.[2]?.v) || 30; // C열: 총 인원수 (기본 30)
+              const excludeRaw = String(r.c?.[3]?.v ?? ''); // D열: 제외 번호 (예: "3, 14, 21")
+              const excludeNums = excludeRaw
+                ? excludeRaw.split(/[,;\s]+/).map(n => parseInt(n.trim(), 10)).filter(n => !isNaN(n))
+                : [];
+              return {
+                id: 'class' + (i + 1),
+                name,
+                pass,
+                maxNum,
+                excludeNums
+              };
+            })
             .filter(c => c.name);
           if (loaded.length) CLASSES = loaded;
         }
@@ -3019,7 +3030,28 @@
              추첨된 번호는 <b>바꿀 수 없습니다.</b><br>지금 번호를 추첨하시겠습니까?`,
             true, async ok => {
               if (!ok) return;
-              const num = Math.floor(Math.random() * TEACHER_NUM_MAX) + 1;
+
+              // 반별 학생수 & 제외 번호(결석생) 반영 추첨 풀 생성
+              const curClassInfo = CLASSES.find(c => c.id === currentClassId);
+              const maxStudent = (curClassInfo && curClassInfo.maxNum) ? curClassInfo.maxNum : TEACHER_NUM_MAX;
+              const excludeList = (curClassInfo && Array.isArray(curClassInfo.excludeNums)) ? curClassInfo.excludeNums : [];
+
+              // 후보 번호 목록 생성 (1번부터 maxStudent 중 excludeList 제외)
+              const candidatePool = [];
+              for (let n = 1; n <= maxStudent; n++) {
+                if (!excludeList.includes(n)) {
+                  candidatePool.push(n);
+                }
+              }
+
+              // 후보가 없을 때 fallback
+              let num;
+              if (candidatePool.length > 0) {
+                num = candidatePool[Math.floor(Math.random() * candidatePool.length)];
+              } else {
+                num = Math.floor(Math.random() * maxStudent) + 1;
+              }
+
               showModal(
                 `🎯 <b>추첨 완료!</b><br><br>
                  접선 번호<br>
