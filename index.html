@@ -1576,7 +1576,8 @@
     <!-- 브리핑 -->
     <div id="briefing-section">
       <div class="wrap" style="text-align:center">
-        <span class="badge" onclick="openAdminLogin()" title="관리자 모드 접속"><i class="fa-solid fa-shield-halved" style="margin-right:.3rem"></i>SECURE PROTOCOL
+        <span class="badge" onclick="openAdminLogin()" title="관리자 모드 접속"><i class="fa-solid fa-shield-halved"
+            style="margin-right:.3rem"></i>SECURE PROTOCOL
           ACTIVE</span>
         <h1 class="op-title">OPERATION : <span>MEMORIAL</span></h1>
         <p class="op-sub">작전명 : 메모리얼 · 전쟁기념관 현장체험학습 미션</p>
@@ -1738,17 +1739,22 @@
       </div>
 
       <!-- ★ 발송된 작전 지령 히스토리 목록 패널 (관리자용) -->
-      <div class="hud" style="border-radius:.85rem;padding:1rem 1.25rem;margin-bottom:.85rem;background:rgba(15,23,42,0.92);border:1px solid var(--border2)">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem;flex-wrap:wrap;gap:.4rem">
+      <div class="hud"
+        style="border-radius:.85rem;padding:1rem 1.25rem;margin-bottom:.85rem;background:rgba(15,23,42,0.92);border:1px solid var(--border2)">
+        <div
+          style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem;flex-wrap:wrap;gap:.4rem">
           <div style="font-size:.82rem;font-weight:800;color:var(--text);display:flex;align-items:center;gap:.4rem">
             <i class="fa-solid fa-clock-rotate-left tg"></i> 발송된 작전 지령 히스토리
-            <span id="admin-notice-cnt" style="font-size:.68rem;color:var(--amber);background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);padding:.15rem .45rem;border-radius:.3rem;font-weight:700">0건</span>
+            <span id="admin-notice-cnt"
+              style="font-size:.68rem;color:var(--amber);background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);padding:.15rem .45rem;border-radius:.3rem;font-weight:700">0건</span>
           </div>
-          <button class="btn-ghost btn-danger" onclick="clearNoticesConfirm()" style="padding:.35rem .75rem;font-size:.72rem">
+          <button class="btn-ghost btn-danger" onclick="clearNoticesConfirm()"
+            style="padding:.35rem .75rem;font-size:.72rem">
             <i class="fa-solid fa-trash-can" style="margin-right:.3rem"></i>지령 내역 전체 초기화
           </button>
         </div>
-        <div id="admin-notice-history-list" style="max-height:160px;overflow-y:auto;display:flex;flex-direction:column;gap:.45rem">
+        <div id="admin-notice-history-list"
+          style="max-height:160px;overflow-y:auto;display:flex;flex-direction:column;gap:.45rem">
           <div style="font-size:.75rem;color:var(--muted);text-align:center;padding:.8rem 0">발송된 작전 지령이 없습니다.</div>
         </div>
       </div>
