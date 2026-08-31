@@ -1895,14 +1895,15 @@
   <div id="notice-modal" class="modal-ov" style="z-index: 120;" onclick="if(event.target===this)closeNoticeModal()">
     <div class="hud modal-box"
       style="border:2px solid #ef4444;box-shadow:0 0 45px rgba(239,68,68,0.55);text-align:center !important;max-width:390px;background:rgba(15,23,42,0.98);padding:1.8rem 1.4rem;position:relative;">
-      
+
       <!-- ✕ 닫기 버튼 (우측 상단) -->
       <button onclick="closeNoticeModal()"
         style="position:absolute;top:1rem;right:1rem;background:none;border:none;color:var(--muted);font-size:1.25rem;cursor:pointer;z-index:10;"><i
           class="fa-solid fa-xmark"></i></button>
 
       <!-- ★ 1. 전체 학급 작전 지령 뱃지 (상단 중앙) -->
-      <div style="width:100% !important;text-align:center !important;margin-top:.2rem !important;margin-bottom:.75rem !important;">
+      <div
+        style="width:100% !important;text-align:center !important;margin-top:.2rem !important;margin-bottom:.75rem !important;">
         <span
           style="display:inline-flex !important;align-items:center !important;justify-content:center !important;font-size:.78rem !important;font-weight:800 !important;letter-spacing:.04em !important;color:#fca5a5 !important;background:rgba(239,68,68,0.18) !important;border:1px solid rgba(239,68,68,0.5) !important;padding:.35rem 1rem !important;border-radius:999px !important;line-height:1.3 !important;"
           id="notice-modal-badge">
@@ -1911,7 +1912,8 @@
       </div>
 
       <!-- ★ 2. 제목 (중앙) -->
-      <h3 style="font-size:1.2rem !important;font-weight:900 !important;color:#fff !important;margin-bottom:.85rem !important;letter-spacing:.04em !important;text-align:center !important;display:flex !important;align-items:center !important;justify-content:center !important;gap:.35rem !important;">
+      <h3
+        style="font-size:1.2rem !important;font-weight:900 !important;color:#fff !important;margin-bottom:.85rem !important;letter-spacing:.04em !important;text-align:center !important;display:flex !important;align-items:center !important;justify-content:center !important;gap:.35rem !important;">
         <span>🚨</span> 긴급 작전 본부 지령
       </h3>
 
@@ -1920,7 +1922,9 @@
         style="font-size:.95rem !important;font-weight:700 !important;color:#fde68a !important;line-height:1.65 !important;background:rgba(0,0,0,0.48) !important;border-radius:.75rem !important;padding:.95rem 1rem !important;margin-bottom:.45rem !important;word-break:keep-all !important;border:1px dashed rgba(245,158,11,0.5) !important;text-align:center !important;">
         수신된 작전 지령이 없습니다.
       </div>
-      <div style="font-size:.68rem !important;color:#94a3b8 !important;margin-bottom:1rem !important;text-align:center !important;" id="notice-modal-time">
+      <div
+        style="font-size:.68rem !important;color:#94a3b8 !important;margin-bottom:1rem !important;text-align:center !important;"
+        id="notice-modal-time">
       </div>
 
       <!-- 이전 지령 목록 (히스토리) -->
@@ -2167,6 +2171,7 @@
     }
 
     // 구글 시트 저장용 cells 정제 (드라이브 URL 및 경량화된 실시간 썸네일 데이터 보존)
+    // 구글 시트 저장용 cells 정제 (드라이브 URL 및 마이크로 실시간 동기화 썸네일 보존)
     function sanitizeCellsForSheet(cells) {
       if (!cells || !Array.isArray(cells)) return [];
       return cells.map(c => {
@@ -2176,8 +2181,8 @@
         } else if (cleanUrl.startsWith('http')) {
           cleanUrl = formatDriveThumbnailUrl(cleanUrl);
         } else if (cleanUrl.startsWith('data:image/')) {
-          // 용량 초과 방지: 15KB 이하의 경량 썸네일만 시트 F열에 저장하여 다른 기기 공유 허용
-          if (cleanUrl.length > 20000) {
+          // 4.5KB(약 6000자) 이하의 마이크로 동기화 썸네일은 구글 시트에 안전하게 보존하여 모든 타 기기(모바일/PC)에 0초 즉시 동기화
+          if (cleanUrl.length > 6500) {
             cleanUrl = '';
           }
         }
@@ -2187,6 +2192,7 @@
           desc: c.desc || '',
           isSpecial: !!c.isSpecial,
           isTeacher: !!c.isTeacher,
+          isPassed: !!c.isPassed,
           freeNum: c.freeNum || null,
           completed: !!c.completed,
           imgUrl: cleanUrl
@@ -2216,11 +2222,13 @@
               const locCell = localCached?.cells?.[idx];
               const isCompleted = !!(srvCell.completed || (locCell && locCell.completed));
 
+              // 서버 이미지 URL 우선 (다른 기기에서 올린 최신 사진), 없으면 로컬 캐시 사용
               let finalImg = srvCell.imgUrl || locCell?.imgUrl || localStorage.getItem(`opm_img_${id}_${idx}`) || '';
               if (finalImg && finalImg.startsWith('http')) {
                 finalImg = formatDriveThumbnailUrl(finalImg);
               }
 
+              // 서버에서 받은 이미지가 있고 로컬에 없거나 갱신되었으면 로컬에도 영구 캐시
               if (finalImg && !finalImg.startsWith('blob:')) {
                 try { localStorage.setItem(`opm_img_${id}_${idx}`, finalImg); } catch (e) { }
               }
@@ -2231,6 +2239,7 @@
                 desc: srvCell.desc || locCell?.desc || '',
                 isSpecial: !!(srvCell.isSpecial ?? locCell?.isSpecial),
                 isTeacher: !!(srvCell.isTeacher ?? locCell?.isTeacher),
+                isPassed: !!(srvCell.isPassed || locCell?.isPassed),
                 freeNum: srvCell.freeNum ?? locCell?.freeNum ?? null,
                 completed: isCompleted,
                 imgUrl: finalImg
@@ -2283,6 +2292,7 @@
                   desc: srvCell.desc || locCell?.desc || '',
                   isSpecial: !!(srvCell.isSpecial ?? locCell?.isSpecial),
                   isTeacher: !!(srvCell.isTeacher ?? locCell?.isTeacher),
+                  isPassed: !!(srvCell.isPassed || locCell?.isPassed),
                   freeNum: srvCell.freeNum ?? locCell?.freeNum ?? null,
                   completed: isCompleted,
                   imgUrl: finalImgUrl
@@ -2828,10 +2838,23 @@
       // 1회 즉시 공지 확인
       checkAndShowNotice();
 
+      // ★ 기기 화면 잠금해제 또는 카메라 촬영 후 복귀 시 즉시 동기화 트리거
+      if (!window._opm_sync_bound) {
+        window._opm_sync_bound = true;
+        const instantSync = async () => {
+          if (!currentClassId || isUploadingPhoto) return;
+          try {
+            const freshData = await DB.getClass(currentClassId);
+            if (freshData && freshData.cells) renderGrid(freshData);
+          } catch (e) { }
+        };
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) instantSync(); });
+        window.addEventListener('focus', () => { instantSync(); });
+      }
+
       if (pollingTimer) clearInterval(pollingTimer);
       pollingTimer = setInterval(async () => {
-        // 사진 업로드 중이거나, 백그라운드(화면 꺼짐) 상태면 트래픽 절약을 위해 일시 건너뜀 (100명 동시접속 최적화)
-        if (!currentClassId || isUploadingPhoto || document.hidden) return;
+        if (!currentClassId || isUploadingPhoto) return;
 
         try {
           const freshData = await DB.getClass(currentClassId);
@@ -2848,16 +2871,16 @@
           // 공지사항 팝업 실시간 체크
           checkAndShowNotice();
         } catch (e) { }
-      }, 2500);
+      }, 2000);
 
       if (fbPollingTimer) clearInterval(fbPollingTimer);
       fbPollingTimer = setInterval(async () => {
-        if (!currentClassId || isUploadingPhoto || document.hidden) return;
+        if (!currentClassId || isUploadingPhoto) return;
         try {
           const freshFbs = await DB.getFeedbacks(currentClassId, currentClassName);
           renderFeedbackList(freshFbs);
         } catch (e) { }
-      }, 4000);
+      }, 3500);
     }
 
     /* ═══════════════════════════════════════════════════════════
@@ -2925,7 +2948,7 @@
       lastRenderedStateJson = JSON.stringify({
         themeName: data?.themeName,
         teacherNum: data?.teacherNum,
-        cells: (data?.cells || []).map(c => ({ id: c.id, completed: c.completed, imgUrl: c.imgUrl, title: c.title }))
+        cells: (data?.cells || []).map(c => ({ id: c.id, completed: c.completed, imgUrl: c.imgUrl, title: c.title, isPassed: c.isPassed }))
       });
 
       if (!data || !data.themeName) {
@@ -3127,7 +3150,7 @@
     }
 
     /* ═══════════════════════════════════════════════════════════
-       ★ 초고속 사진 업로드 & 구글 드라이브/시트 완벽 연동 (16개 연속 인증 보장)
+       ★ 초고속 사진 업로드 & 구글 드라이브/시트 완벽 연동 (모든 기기 실시간 동기화)
        ═══════════════════════════════════════════════════════════ */
     document.getElementById('file-uploader').onchange = async e => {
       const file = e.target.files[0];
@@ -3145,57 +3168,49 @@
           if (fetched && fetched.cells) currentClassData = fetched;
         }
 
-        // 2. 즉시 로컬 Blob URL 생성하여 화면에 0.001초만에 즉각 반영
-        const localBlobUrl = URL.createObjectURL(file);
+        // 2. 고화질 로컬 사진(내 폰 뷰어용) 및 초경량 공유 썸네일(기기간 0초 실시간 동기화용) 생성
+        const highResBase64 = await compressImgToBase64(file, 640, 0.65);
+        const microThumbBase64 = await compressImgToBase64(file, 120, 0.32);
+
+        // 내 기기 로컬 캐시에는 고화질 즉시 보관
+        try {
+          localStorage.setItem(`opm_img_${currentClassId}_${targetIdx}`, highResBase64);
+        } catch (err) { }
+
+        // 로컬 데이터에 고화질 즉시 반영
         if (currentClassData && currentClassData.cells && currentClassData.cells[targetIdx]) {
           currentClassData.cells[targetIdx].completed = true;
-          currentClassData.cells[targetIdx].imgUrl = localBlobUrl;
+          currentClassData.cells[targetIdx].imgUrl = highResBase64;
           localStorage.setItem(DB._k('classes', currentClassId), JSON.stringify(currentClassData));
           renderGrid(currentClassData);
         }
 
-        // 3. 이미지 압축 (모바일 전송 최적화)
-        const base64 = await compressImgToBase64(file);
-        try {
-          localStorage.setItem(`opm_img_${currentClassId}_${targetIdx}`, base64);
-        } catch (err) { }
-
-        // 로컬 데이터에 base64 반영 (네트워크 지연 시에도 내 폰에서는 즉시 유지)
-        if (currentClassData && currentClassData.cells && currentClassData.cells[targetIdx]) {
-          currentClassData.cells[targetIdx].completed = true;
-          currentClassData.cells[targetIdx].imgUrl = base64;
-          localStorage.setItem(DB._k('classes', currentClassId), JSON.stringify(currentClassData));
-        }
-
         const cellTitle = currentClassData?.cells?.[targetIdx]?.title || `미션 ${targetIdx + 1}`;
 
-        // 4. 구글 드라이브 업로드 시도
-        let finalDriveUrl = '';
+        // 3. 구글 드라이브 업로드 시도 (드라이브 승인 시 영구 고화질 URL 생성)
+        let sharingImgUrl = microThumbBase64;
         try {
-          finalDriveUrl = await DB.uploadPhoto(currentClassId, currentClassName, targetIdx, cellTitle, base64);
+          const finalDriveUrl = await DB.uploadPhoto(currentClassId, currentClassName, targetIdx, cellTitle, highResBase64);
+          if (finalDriveUrl && finalDriveUrl.startsWith('http')) {
+            sharingImgUrl = formatDriveThumbnailUrl(finalDriveUrl);
+          }
         } catch (err) {
-          console.warn('[Upload] 드라이브 업로드 오류:', err);
+          console.warn('[Upload] 드라이브 업로드 예외 -> 마이크로 동기화 썸네일 적용:', err);
         }
 
-        // 5. 드라이브 URL이 있으면 드라이브 URL 우선, 없으면 초경량 썸네일(3KB)로 시트에 저장하여 다른 친구 기기에도 즉시 사진 표시
-        let sharingImgUrl = '';
-        if (finalDriveUrl && finalDriveUrl.startsWith('http')) {
-          sharingImgUrl = formatDriveThumbnailUrl(finalDriveUrl);
-        } else {
-          // 드라이브 권한 미승인 대비: 다른 기기 친구들에게 공유할 초경량 썸네일 생성 (3KB 내외)
-          sharingImgUrl = await compressImgToBase64(file, 240, 0.42);
-        }
-
+        // 4. 공유용 이미지 URL(드라이브 URL 또는 초경량 마이크로 썸네일) 설정
         if (currentClassData && currentClassData.cells && currentClassData.cells[targetIdx]) {
           currentClassData.cells[targetIdx].completed = true;
           currentClassData.cells[targetIdx].imgUrl = sharingImgUrl;
           try {
-            localStorage.setItem(`opm_img_${currentClassId}_${targetIdx}`, sharingImgUrl);
+            if (sharingImgUrl.startsWith('http')) {
+              localStorage.setItem(`opm_img_${currentClassId}_${targetIdx}`, sharingImgUrl);
+            }
             localStorage.setItem(DB._k('classes', currentClassId), JSON.stringify(currentClassData));
           } catch (e) { }
         }
 
-        // 6. 구글 시트에 인증 완료 상태 및 썸네일 URL을 확실하게 저장
+        // 5. 구글 시트 및 서버에 인증 완료 상태 및 썸네일 URL을 확실하게 저장
         await DB.updClass(currentClassId, { cells: currentClassData.cells });
 
         hideToast();
@@ -3230,10 +3245,10 @@
                 h = maxDim;
               }
             }
-            canvas.width = w;
-            canvas.height = h;
+            canvas.width = Math.max(1, w);
+            canvas.height = Math.max(1, h);
             const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, w, h);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             resolve(canvas.toDataURL('image/jpeg', quality));
           };
           img.onerror = reject;
